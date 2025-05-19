@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Company</title>
+  <!-- Bootstrap CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="passwordModalLabel">Company Registered Successfully!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Your temporary Super User password is:</p>
+        <div class="input-group mb-3">
+          <input type="text" class="form-control" id="generatedPasswordDisplay" readonly>
+          <button class="btn btn-outline-secondary" type="button" id="copyPasswordButton">Copy</button>
+        </div>
+        <p class="text-danger">Please save this password immediately.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" id="modalProceedButton" data-bs-dismiss="modal">Close and Proceed to Login</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px;">
+      <div class="card-body">
+        <h2 class="text-center mb-4">Register New Company</h2>
+
+        <!-- Registration Form -->
+        <form method="post" action="/register-company" id="register-form">
+          <!-- Company Name -->
+          <div class="mb-3">
+            <label for="company_name" class="form-label">Company Name</label>
+            <input class="form-control" name="company_name" id="company_name" placeholder="Enter your company name" required>
+          </div>
+
+          <!-- Company Code (disabled until name is filled) -->
+          <div class="mb-3">
+            <label for="company_code" class="form-label">Company Code</label>
+            <input class="form-control text-uppercase" name="company_code" id="company_code" placeholder="Enter your company code" required disabled>
+            <div id="code-warning" class="text-danger" style="display: none;">This company code already exists</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="subscription_code" class="form-label">Select Subscription Option</label><br>
+            <!-- Subscription options as radio buttons will be dynamically added here -->
+            <div id="subscription-options"></div>
+          </div>
+
+          <div class="mb-3">
+            <label for="super_user_name" class="form-label">Super User Name</label>
+            <input class="form-control" name="super_user_name" id="super_user_name" placeholder="Enter your Super User/Admin Name" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="super_user_email" class="form-label">Super User Email</label>
+            <input class="form-control" name="super_user_email" id="super_user_email" placeholder="Enter your company name" required>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success" id="submit-btn">Register</button>
+          </div>
+          <div class="text-danger mt-2" id="backend-error" style="display: none;"></div>
+        </form>
+
+        <div class="text-center mt-3">
+          <p>Already have an account? <a href="/" class="text-decoration-none">Login here</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+  <!-- JavaScript to handle company code validation and dynamic subscription options -->
+
+  <script>
+  // Load subscription options dynamically
+  async function loadSubscriptionOptions() {
+    const response = await fetch('/subscriptions');
+    const subscriptions = await response.json();
+
+    const subscriptionContainer = document.getElementById('subscription-options');
+
+    subscriptions.forEach(sub => {
+      const radioButton = document.createElement('div');
+      radioButton.classList.add('form-check');
+      
+      radioButton.innerHTML = `
+        <input class="form-check-input" type="radio" name="subscription_code" value="${sub.code}" id="sub_${sub.id}">
+        <label class="form-check-label" for="sub_${sub.id}">${sub.max_users} Users</label>
+      `;
+      
+      subscriptionContainer.appendChild(radioButton);
+    });
+  }
+
+  loadSubscriptionOptions();
+
+
+  const registerForm = document.getElementById('register-form');
+  const company_nameInput = document.getElementById("company_name");
+  const company_codeInput = document.getElementById("company_code");
+  const submitButton = document.getElementById("submit-btn");
+  const codeWarning = document.getElementById("code-warning");
+  const backendErrorDiv = document.getElementById("backend-error");
+
+  // Enable code input only if name is filled
+     company_nameInput.addEventListener('input', function () {
+      // Only enable if name is not empty after trimming whitespace
+       company_codeInput.disabled = this.value.trim() === "";
+      // Clear code input and warnings if name becomes empty
+      if (this.value.trim() === "") {
+         company_codeInput.value = "";
+        codeWarning.style.display = 'none';
+        // Re-evaluate submit button state based on other fields if necessary
+      }
+    });
+
+    // Uppercase transformation & code existence check
+     company_codeInput.addEventListener('input', async function () {
+      this.value = this.value.toUpperCase(); // Auto-uppercase while typing
+      const companyCode = this.value;
+
+      // Only check if code is not empty
+      if (companyCode.length > 0) {
+        try {
+          const response = await fetch(`/check-company-code/${companyCode}`);
+          const data = await response.json();
+
+          if (data.exists) {
+            submitButton.disabled = true; // Disable if code exists
+            codeWarning.style.display = 'block';
+          } else {
+            codeWarning.style.display = 'none';
+             // Re-enable submit button only if no other validation errors exist
+            checkFormValidity(); // <-- Check overall form validity
+          }
+        } catch (error) {
+          console.error("Error checking company code:", error);
+          codeWarning.style.display = 'none'; // Hide warning on error
+          // Consider temporarily disabling submit or showing a network error message
+          // submitButton.disabled = true;
+        }
+      } else {
+        // If code input is empty, hide warning and check form validity
+        codeWarning.style.display = 'none';
+        checkFormValidity(); // <-- Check overall form validity
+      }
+    });
+
+    // Function to check if the form is valid (basic client-side check)
+    function checkFormValidity() {
+        // Ensure company code is not in use and other required fields are filled
+        const isCodeAvailable = codeWarning.style.display === 'none';
+        const areRequiredFieldsFilled = registerForm.checkValidity(); // Uses built-in HTML validation
+
+        submitButton.disabled = !(isCodeAvailable && areRequiredFieldsFilled);
+    }
+
+    // Re-check form validity whenever inputs change (after initial checks)
+    registerForm.querySelectorAll('input[required]').forEach(input => {
+        input.addEventListener('input', checkFormValidity);
+    });
+
+    // Initial check when the page loads
+    checkFormValidity();
+
+    // --- Handle Form Submission via Fetch ---
+    registerForm.addEventListener('submit', async function(event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      // Hide previous errors
+      backendErrorDiv.style.display = 'none';
+      backendErrorDiv.textContent = '';
+
+      // Ensure code input is enabled for submission if it has a value
+      // This is crucial for FormData to include its value
+      if ( company_codeInput.value.trim() !== "") {
+           company_codeInput.disabled = false;
+      }
+
+
+      const formData = new FormData(registerForm); // Collect form data
+
+      try {
+        const response = await fetch('/register-company', {
+          method: 'POST',
+          body: formData // FormData handles setting the correct Content-Type
+        });
+
+        const data = await response.json();
+
+        if (response.ok) { // Check for a successful HTTP status code (200-299)
+          // Registration was successful
+          const generatedPassword = data.generated_password;
+
+          // Show the password in the modal instead of alert
+             generatedPasswordDisplayInput.value = generatedPassword;
+             passwordModal.show();
+
+             // Set the redirect URL when the modal is closed/hidden
+             // Use Bootstrap's 'hidden.bs.modal' event
+             // Make sure to remove the listener after it triggers once
+             const modalHiddenListener = function () {
+                 window.location.href = data.redirect_url || '/';;
+                 passwordModalElement.removeEventListener('hidden.bs.modal', modalHiddenListener); // Clean up listener
+             };
+             passwordModalElement.addEventListener('hidden.bs.modal', modalHiddenListener);
+
+          // Redirect after the user acknowledges
+          window.location.href = data.redirect_url || '/'; // Or wherever your login page is
+
+        } else {
+          // Handle backend errors (e.g., company code exists, email exists)
+          const errorMessage = data.detail || 'An unknown error occurred.';
+          backendErrorDiv.textContent = errorMessage;
+          backendErrorDiv.style.display = 'block';
+
+            // Re-disable the code input if it was enabled just for submission
+            if ( company_nameInput.value.trim() === "") {
+                  company_codeInput.disabled = true;
+            }
+        }
+      } catch (error) {
+        console.error('Error during registration fetch:', error);
+        backendErrorDiv.textContent = 'A network error occurred. Please try again.';
+        backendErrorDiv.style.display = 'block';
+
+        // Re-disable the code input if it was enabled just for submission
+        if ( company_nameInput.value.trim() === "") {
+              company_codeInput.disabled = true;
+        }
+      } finally {
+          // Re-check form validity in case the submit button state needs adjustment
+          checkFormValidity();
+      }
+    });
+</script>
+
+</body>
+</html>
