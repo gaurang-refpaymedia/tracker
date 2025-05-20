@@ -11,3 +11,6 @@ def get_password_hash(password):
 
 def get_current_user(request: Request):
     return request.session.get("user")
+
+
+# superadmin password - QvPNqUg4XRqf
