@@ -1,9 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FiFacebook, FiGithub, FiTwitter } from "react-icons/fi";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contextApi/AuthContext";
 
 const LoginForm = ({ registerPath, resetPath }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -13,6 +14,7 @@ const LoginForm = ({ registerPath, resetPath }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await login(email,password);
+    
     if(result.success){
         console.log("Login successful!", result.user);
         navigate('/dashboard');
@@ -23,9 +25,11 @@ const LoginForm = ({ registerPath, resetPath }) => {
     }
   }
 
-  if (isLoggedIn) {
+  useEffect(() =>{
+    if (isLoggedIn) {
         navigate('/dashboard');
     }
+  },[isLoggedIn,navigate])
 
   return (
     <>
@@ -123,7 +127,6 @@ const LoginForm = ({ registerPath, resetPath }) => {
       <div className="mt-5 text-muted">
         <span> Don't have an account?</span>
         <Link to={registerPath} className="fw-bold">
-          {" "}
           Create an Account
         </Link>
       </div>

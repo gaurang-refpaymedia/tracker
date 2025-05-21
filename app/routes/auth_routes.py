@@ -23,7 +23,7 @@ def get_db():
         # This is crucial to prevent database connection leaks
 
 
-@router.get("/")
+@router.get("/api/")
 def login_page(request: Request):
     """
     Route for displaying the login page.
@@ -37,7 +37,7 @@ def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})  # Render the login page
 
 
-@router.post("/login")
+@router.post("/api/login")
 def login(request: Request, db: Session = Depends(get_db), email: str = Form(...), password: str = Form(...)):
     """
     Route for handling user login.
@@ -82,7 +82,7 @@ def login(request: Request, db: Session = Depends(get_db), email: str = Form(...
 
 
 
-@router.get("/dashboard")
+@router.get("/api/dashboard")
 async def dashboard(request: Request):
     """
     Route for displaying the dashboard.  Requires a logged-in user.
@@ -106,4 +106,28 @@ async def dashboard(request: Request):
         return JSONResponse(
             content={"error": f"Internal server error: {e}"},  # Include error details
             status_code=500,  # Set status to 500
+        )
+
+@router.post("/api/logout")
+async def logout(request: Request):
+    """
+    Route for handling user logout.
+
+    Args:
+        request (Request): The incoming request object.
+
+    Returns:
+        JSONResponse: Returns a JSON response indicating the result of the logout attempt.
+            - On success: Returns a success message.
+            - On internal server error: Returns a JSON response with a 500 status and error details.
+    """
+    try:
+        if "user" in request.session:
+            del request.session["user"]  # Remove user data from the session
+        return JSONResponse(content={"message": "Successfully logged out"})
+    except Exception as e:
+        print(f"Error in /logout: {e}")  # Log the error
+        return JSONResponse(
+            content={"error": f"Internal server error: {e}"},
+            status_code=500,
         )

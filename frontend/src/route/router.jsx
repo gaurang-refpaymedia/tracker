@@ -1,8 +1,26 @@
 import { createBrowserRouter } from "react-router-dom";
 import LayoutAuth from "../layout/layoutAuth";
 import LoginCover from "../pages/Login";
+import ApplicationLayout from "../layout/applicationLayout";
+import { Dashboard } from "../pages/Dashboard";
+import Register from "../pages/Register";
+import ProtectedRoute from "./ProtectedLayout";
 
 export const router = createBrowserRouter([
+    {
+        path: "/",
+        element: (
+            <ProtectedRoute>
+                <ApplicationLayout/>
+            </ProtectedRoute>
+        ),
+        children:[
+            {
+                path: "/dashboard",
+                element: <Dashboard/>
+            },
+        ]
+    },
     {
         path: "/",
         element: <LayoutAuth/>,
@@ -10,6 +28,10 @@ export const router = createBrowserRouter([
             {
                 path: "/login",
                 element: <LoginCover/>
+            },
+            {
+                path: "/register",
+                element: <Register/>
             },
         ]
     }

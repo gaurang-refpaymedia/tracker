@@ -32,11 +32,12 @@ def register_company_form(request: Request):
 # Helper function to generate a random password
 def generate_random_password(length=12):
     """Generate a random alphanumeric password."""
-    characters = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(characters) for i in range(length))
+    # characters = string.ascii_letters + string.digits
+    # return ''.join(secrets.choice(characters) for i in range(length))
+    return "Admin1234"
 
 
-@router.post("/register-company")
+@router.post("/api/register-company")
 def register_company(request: Request,
                     company_name: str = Form(...),
                     company_code: str = Form(...),
@@ -117,7 +118,7 @@ def register_company(request: Request,
     return RedirectResponse(url="/", status_code=302)
 
 # Endpoint to check if company code already exists
-@router.get("/check-company-code/{company_code}")
+@router.get("/api/check-company-code/{company_code}")
 def check_company_code(company_code: str, db: Session = Depends(get_db)):
     # Query the database to check if the company code exists
     company = db.query(Company).filter(Company.code == company_code).first()

@@ -7,7 +7,7 @@ from app.models import Subscription
 router = APIRouter()
 
 # Endpoint to get all subscription options
-@router.get("/subscriptions")
+@router.get("/api/subscriptions")
 def get_subscriptions(db: Session = Depends(get_db)):
     subscriptions = db.query(Subscription).all()  # Get all subscriptions from the DB
     return subscriptions
