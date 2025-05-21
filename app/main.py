@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import os
 from app.database import Base, engine
-from app.routes import auth_routes, company_routes, subscription_routes
+from app.routes import auth_routes, company_routes, subscription_routes, user_routes
 from fastapi.middleware.cors import CORSMiddleware # Import CORS middleware
 
 # Load environment variables from .env
@@ -39,3 +39,4 @@ Base.metadata.create_all(bind=engine)
 app.include_router(auth_routes.router)
 app.include_router(company_routes.router)
 app.include_router(subscription_routes.router)
+app.include_router(user_routes.router)

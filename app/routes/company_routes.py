@@ -54,12 +54,12 @@ def register_company(request: Request,
     if existing_company:
         # Handle error: redirect back with message or return JSON error
         # For now, an HTTP Exception. In a real app, you might redirect with an error query param.
-        raise JSONResponse(status_code=500, content={"success": False, "detail": f"Company code '{company_unique_code}' already exists."})
+        return JSONResponse(status_code=500, content={"success": False, "detail": f"Company code '{company_unique_code}' already exists."})
 
     # 2. Check if Super User Email already exists
     existing_user_by_email = db.query(models.User).filter(models.User.email == super_user_email).first()
     if existing_user_by_email:
-        raise JSONResponse(status_code=500, content={"success": False, "detail":f"Email '{super_user_email}' is already registered."})
+        return JSONResponse(status_code=500, content={"success": False, "detail":f"Email '{super_user_email}' is already registered."})
         # raise HTTPException(status_code=400, detail=f"Email '{super_user_email}' is already registered.")
 
      # 3. Generate the Super User password and code
@@ -73,7 +73,7 @@ def register_company(request: Request,
     if existing_user_by_code:
         # This scenario should be rare if company_unique_code is unique, but good to handle.
         # You might need a more robust user_code generation strategy (e.g., UUID).
-        raise JSONResponse(status_code=500, content={"success": False, "detail": "Failed to generate a unique user code. Please try again."})
+        return JSONResponse(status_code=500, content={"success": False, "detail": "Failed to generate a unique user code. Please try again."})
         # raise HTTPException(status_code=500, detail="Failed to generate a unique user code. Please try again.")
 
     # 5. Define the role for the super user
