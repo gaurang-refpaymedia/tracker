@@ -16,21 +16,19 @@ app = FastAPI()
 
 # Add CORS middleware to allow cross-origin requests
 origins = [
-    "http://localhost",
-    "http://localhost:3000",  # Or your React dev server port
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:5173"],  # match your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY,    same_site="none", https_only=False)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 

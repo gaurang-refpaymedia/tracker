@@ -14,4 +14,10 @@ class UserLogin(BaseModel):
 # app/schemas.py
 class PasswordChangeRequest(BaseModel):
     old_password: str
-    new_password: Annotated[str, Field(min_length=8)] # Enforce a minimum password length, adjust as needed
+    new_password: str = Field(..., min_length=8)
+
+
+# You might want a schema for the user data stored in the session
+class UserSessionData(BaseModel):
+    user_code: str
+    username: str # Optional, but useful

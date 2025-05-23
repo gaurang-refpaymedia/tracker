@@ -5,6 +5,7 @@ import ApplicationLayout from "../layout/applicationLayout";
 import { Dashboard } from "../pages/Dashboard";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedLayout";
+import ChangePassword from "../pages/ChangePassword";
 
 export const router = createBrowserRouter([
     {
@@ -18,6 +19,10 @@ export const router = createBrowserRouter([
             {
                 path: "/dashboard",
                 element: <Dashboard/>
+            },
+            {
+                path: "/change-password",
+                element: <ChangePassword/>
             },
         ]
     },

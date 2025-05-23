@@ -5,13 +5,19 @@ export const AuthContext = createContext({
   user: null,
   isLoggedIn: false,
   login: async (email, password) => {},
-  register: async (company_name, company_code, super_user_name, super_user_email) => {},
+  register: async (
+    company_name,
+    company_code,
+    super_user_name,
+    super_user_email
+  ) => {},
   logout: () => {},
+  changePassword: async (oldPassword, newPassword) => {}, // Added to context type
 });
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [registerCompany, setRegisterCompany] = useState(null);
+  const [registerCompany, setRegisterCompany] = useState(null); // This state variable seems unused
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -32,12 +38,14 @@ const AuthProvider = ({ children }) => {
     console.log("AuthContext: Attempting login for email:", email);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/login",
+        "http://127.0.0.1:8000/api/login", // IMPORTANT: Verify this URL in your FastAPI routes.
+                                          // Is it `/api/login` or `/users/api/login`?
         new URLSearchParams({ email, password }).toString(),
         {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
+          withCredentials: true, // This is correctly set for login
         }
       );
 
@@ -66,16 +74,14 @@ const AuthProvider = ({ children }) => {
           success: false,
           error:
             parsedData?.error || `Login failed with status ${response.status}`,
-        }; // Include status
+        };
       }
     } catch (error) {
       console.error("AuthContext: Axios error during login:", error);
       setIsLoggedIn(false);
       setUser(null);
       localStorage.removeItem("user");
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
+      if (axios.isAxiosError(error) && error.response) {
         console.error("AuthContext: Server error:", error.response.data);
         return {
           success: false,
@@ -84,10 +90,8 @@ const AuthProvider = ({ children }) => {
             `Server error: ${error.response.status}`,
         };
       } else if (error.request) {
-        // The request was made but no response was received
         return { success: false, error: "No response from server" };
       } else {
-        // Something happened in setting up the request that triggered an Error
         return {
           success: false,
           error: "Error setting up request: " + error.message,
@@ -105,7 +109,7 @@ const AuthProvider = ({ children }) => {
   ) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/register-company",
+        "http://127.0.0.1:8000/api/register-company", // IMPORTANT: Verify this URL in your FastAPI routes.
         new URLSearchParams({
           company_name,
           company_code,
@@ -117,6 +121,9 @@ const AuthProvider = ({ children }) => {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
+          // CONSIDER adding withCredentials: true here too if this registration
+          // also relies on or interacts with session cookies (e.g., if it auto-logs in)
+          // For a pure registration without immediate session interaction, it might not be strictly needed.
         }
       );
 
@@ -127,7 +134,7 @@ const AuthProvider = ({ children }) => {
           "AuthContext: Company registration successful, data:",
           parsedData
         );
-        // setRegisterCompany(parsedData);
+        // setRegisterCompany(parsedData); // This state variable is declared but not actively used or returned.
         return { success: true, data: parsedData };
       } else {
         console.error(
@@ -135,7 +142,6 @@ const AuthProvider = ({ children }) => {
           response.status,
           parsedData
         );
-        // Attempt to extract a clear error message
         let errorMessage =
           "Registration failed due to an unexpected server response.";
         if (parsedData && typeof parsedData === "object" && parsedData.detail) {
@@ -145,7 +151,6 @@ const AuthProvider = ({ children }) => {
             Array.isArray(parsedData.detail) &&
             parsedData.detail.length > 0
           ) {
-            // For Pydantic validation errors, detail is often an array of objects
             errorMessage = parsedData.detail
               .map((err) => err.msg || "Validation error")
               .join(", ");
@@ -153,7 +158,6 @@ const AuthProvider = ({ children }) => {
             typeof parsedData.detail === "object" &&
             parsedData.detail.message
           ) {
-            // Check for a 'message' key within detail if it's an object
             errorMessage = parsedData.detail.message;
           }
         }
@@ -163,10 +167,9 @@ const AuthProvider = ({ children }) => {
         };
       }
     } catch (error) {
-      // setRegisterCompany(null); // Clear registration status on error
-
+      // setRegisterCompany(null);
       let errorMessage = "An unknown error occurred.";
-      if (error.response) {
+      if (axios.isAxiosError(error) && error.response) {
         console.error(
           "AuthContext: Registration error response:",
           error.response
@@ -184,16 +187,12 @@ const AuthProvider = ({ children }) => {
               .map((err) => err.msg || "Validation error")
               .join(", ");
           } else if (errorData.error) {
-            // Your custom error like {"error": "Invalid credentials"}
             errorMessage = errorData.error;
           } else if (typeof errorData === "string") {
-            errorMessage = errorData; // Sometimes the response data might just be a string
+            errorMessage = errorData;
           } else if (errorData.message) {
-            // Common generic error message key
             errorMessage = errorData.message;
-          }
-          // Fallback if none of the above match, try to stringify if it's an object
-          else if (typeof errorData === "object") {
+          } else if (typeof errorData === "object") {
             try {
               errorMessage = JSON.stringify(errorData);
             } catch (e) {
@@ -203,7 +202,7 @@ const AuthProvider = ({ children }) => {
         } else {
           errorMessage = `Server error: ${error.response.status}`;
         }
-      } else if (error.request) {
+      } else if (axios.isAxiosError(error)) {
         console.error(
           "AuthContext: Registration no response from server:",
           error.request
@@ -224,19 +223,114 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsLoggedIn(false);
-    localStorage.removeItem("user");
+  const changePassword = async (oldPassword, newPassword) => {
+    try {
+      if (!oldPassword || !newPassword) {
+        console.error("Old password and new password are required.");
+        return { success: false, message: "Please fill in all fields." };
+      }
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/change-password", // IMPORTANT: Verify this URL in your FastAPI routes.
+        {
+          old_password: oldPassword,
+          new_password: newPassword,
+        },
+        {
+          withCredentials: true, // This is correctly set for changePassword
+        }
+      );
+
+      if (response.data.message === "Password changed successfully.") {
+        console.log("Password changed successfully:", response.data.message);
+        return { success: true, message: response.data.message };
+      } else {
+        console.warn("Unexpected response from server:", response.data);
+        return {
+          success: false,
+          message: response.data.message || "An unexpected error occurred.",
+        };
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Server response data:", error.response.data);
+        console.error("Server response status:", error.response.status);
+
+        if (error.response.status === 400) {
+          return {
+            success: false,
+            message:
+              error.response.data.detail ||
+              "Incorrect old password or invalid input.",
+          };
+        } else if (error.response.status === 401) {
+          return {
+            success: false,
+            message:
+              error.response.data.detail ||
+              "You are not authorized. Please log in again",
+          };
+        } else if (error.response.status === 404) {
+          return {
+            success: false,
+            message: error.response.data.detail || "User not found.",
+          };
+        } else if (error.response.status === 500) {
+          return {
+            success: false,
+            message:
+              error.response.data.detail ||
+              "Server error. Please try again later.",
+          };
+        } else {
+          return {
+            success: false,
+            message: `An error occurred: ${error.response.status} - ${
+              error.response.data.detail || error.message
+            }`,
+          };
+        }
+      } else if (axios.isAxiosError(error)) {
+        return {
+          success: false,
+          message: "Network error. Please check your internet connection.",
+        };
+      } else {
+        return { success: false, message: "An unexpected error occurred." };
+      }
+    }
+  };
+
+  const logout = async () => {
+    try {
+      // ADDED THIS LINE HERE
+      const response = await axios.post("http://127.0.0.1:8000/api/logout", {}, {
+        withCredentials: true, // This is essential for logout to work with session cookies
+      });
+      console.log(response.data);
+
+      if (response.data.message === "Successfully logged out") {
+        setIsLoggedIn(false); // Update local state immediately
+        setUser(null); // Clear user data
+        localStorage.removeItem("user"); // Clear user from local storage
+        window.location.href = "/login"; // Redirect
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Logout failed. Please try again.");
+    }
   };
 
   const authValue = {
     user,
-    registerCompany,
+    registerCompany, // Still present, but unused state variable
     isLoggedIn,
     login,
     logout,
     register,
+    changePassword,
   };
 
   return (

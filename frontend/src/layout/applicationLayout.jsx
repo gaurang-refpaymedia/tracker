@@ -20,9 +20,15 @@ const ApplicationLayout = () => {
   }
   return (
     <>
-      <AdminHeader />
+      <AdminHeader user={user} />
       <AdminSidebar />
-      <Outlet />
+      <main className="nxl-container">
+        <div className="nxl-content">
+          <div className="main-content">
+            <Outlet />
+          </div>
+        </div>
+      </main>
     </>
   );
 };
