@@ -1,6 +1,4 @@
-from pydantic import BaseModel
-from pydantic import BaseModel, constr
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, constr, Field, EmailStr
 from typing import Annotated
 class CompanyCreate(BaseModel):
     name: str
@@ -22,3 +20,9 @@ class PasswordChangeRequest(BaseModel):
 class UserSessionData(BaseModel):
     user_code: str
     username: str # Optional, but useful
+    
+    
+class SubUserCreateRequest(BaseModel):
+    name: str
+    email: EmailStr
+    role_code: str
