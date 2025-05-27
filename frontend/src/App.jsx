@@ -5,16 +5,19 @@ import { router } from "./route/router";
 import AuthProvider from "./contextApi/AuthContext";
 import NavigationProvider from "./contextApi/navigationContext";
 import SideBarToggleProvider from "./contextApi/SidebarContext";
+import DataProvider, { DataContext } from "./contextApi/DataContext";
 
 function App() {
   return (
     <>
       <AuthProvider>
-        <NavigationProvider>
+        <DataProvider>
+          <NavigationProvider>
           <SideBarToggleProvider>
             <RouterProvider router={router} />
           </SideBarToggleProvider>
         </NavigationProvider>
+        </DataProvider>
       </AuthProvider>
     </>
   );

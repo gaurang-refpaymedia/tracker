@@ -12,7 +12,7 @@ export const AuthContext = createContext({
     super_user_email
   ) => {},
   logout: () => {},
-  changePassword: async (oldPassword, newPassword) => {}, // Added to context type
+  changePassword: async (userCode, oldPassword, newPassword) => {}, // Added to context type
 });
 
 const AuthProvider = ({ children }) => {
@@ -39,7 +39,7 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/login", // IMPORTANT: Verify this URL in your FastAPI routes.
-                                          // Is it `/api/login` or `/users/api/login`?
+        // Is it `/api/login` or `/users/api/login`?
         new URLSearchParams({ email, password }).toString(),
         {
           headers: {
@@ -223,9 +223,9 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const changePassword = async (oldPassword, newPassword) => {
+  const changePassword = async (userCode, oldPassword, newPassword) => {
     try {
-      if (!oldPassword || !newPassword) {
+      if (!userCode || !oldPassword || !newPassword) {
         console.error("Old password and new password are required.");
         return { success: false, message: "Please fill in all fields." };
       }
@@ -233,6 +233,7 @@ const AuthProvider = ({ children }) => {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/change-password", // IMPORTANT: Verify this URL in your FastAPI routes.
         {
+          user_code: userCode,
           old_password: oldPassword,
           new_password: newPassword,
         },
@@ -306,9 +307,13 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // ADDED THIS LINE HERE
-      const response = await axios.post("http://127.0.0.1:8000/api/logout", {}, {
-        withCredentials: true, // This is essential for logout to work with session cookies
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/logout",
+        {},
+        {
+          withCredentials: true, // This is essential for logout to work with session cookies
+        }
+      );
       console.log(response.data);
 
       if (response.data.message === "Successfully logged out") {

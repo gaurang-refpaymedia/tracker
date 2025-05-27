@@ -15,21 +15,26 @@ router = APIRouter(
 
 @router.post("/api/change-password")
 async def change_password(
-    request_data: schemas.PasswordChangeRequest,
+    request_data: schemas.PasswordChangeRequest, # Now includes user_code
     db: Session = Depends(get_db),
-    current_user_session_data: dict = Depends(auth.get_current_user)
+    # REMOVED: current_user_session_data: dict = Depends(auth.get_current_user)
+    # If you still want to ensure the user is logged in, you might keep a
+    # simple dependency like 'auth.validate_token' that doesn't return user info
+    # but just ensures the token is valid. For this example, I'm removing the
+    # dependency that fetches user info, as per your request.
 ):
     """
-    Allows a logged-in user to change their password.
-    Requires the old password and a new password.
+    Allows a user to change their password by providing their user_code,
+    old password, and new password.
     """
     try:
         print("🔐 Incoming password change request:", request_data.dict())
-        print("🧑 Session data received:", current_user_session_data)
+        # print("🧑 Session data received:", current_user_session_data) # Removed as per new requirement
 
-        user_identifier = current_user_session_data.get("user_code")
+        # Get user_identifier directly from the request_data
+        user_identifier = request_data.user_code
         if not user_identifier:
-            raise HTTPException(status_code=401, detail="Could not identify user from session.")
+            raise HTTPException(status_code=400, detail="User code must be provided.")
 
         user_in_db = db.query(models.User).filter(models.User.user_code == user_identifier).first()
 
@@ -65,4 +70,3 @@ async def change_password(
         print("🔥 Unexpected error during password change:", str(e))
         db.rollback() # Rollback in case of an unexpected error
         raise HTTPException(status_code=500, detail="Could not update password. Please try again later.")
-
