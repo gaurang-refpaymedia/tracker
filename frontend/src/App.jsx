@@ -6,19 +6,22 @@ import AuthProvider from "./contextApi/AuthContext";
 import NavigationProvider from "./contextApi/navigationContext";
 import SideBarToggleProvider from "./contextApi/SidebarContext";
 import DataProvider, { DataContext } from "./contextApi/DataContext";
+import FormDataProvider from "./contextApi/FormDataContext";
 
 function App() {
   return (
     <>
-      <AuthProvider>
-        <DataProvider>
-          <NavigationProvider>
-          <SideBarToggleProvider>
-            <RouterProvider router={router} />
-          </SideBarToggleProvider>
-        </NavigationProvider>
-        </DataProvider>
-      </AuthProvider>
+      <FormDataProvider>
+        <AuthProvider>
+          <DataProvider>
+            <NavigationProvider>
+              <SideBarToggleProvider>
+                <RouterProvider router={router} />
+              </SideBarToggleProvider>
+            </NavigationProvider>
+          </DataProvider>
+        </AuthProvider>
+      </FormDataProvider>
     </>
   );
 }
