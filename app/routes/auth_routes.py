@@ -126,3 +126,43 @@ async def logout(request: Request):
             content={"error": f"Internal server error: {e}"},
             status_code=500,
         )
+        
+        
+import random
+import string
+
+def generate_otp(length=6):
+    return ''.join(random.choices(string.digits, k=length))
+
+
+from sqlalchemy.orm import Session
+from ..models import User  # adjust import path as per your structure
+
+def set_user_otp(db: Session, email: str):
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return None
+    otp_code = generate_otp()
+    user.otp = otp_code
+    db.commit()
+    db.refresh(user)
+    return otp_code
+
+
+
+from pydantic import BaseModel, EmailStr
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+@router.post("/api/forgot-password")
+def forgot_password(request_data: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """
+    Generates a new OTP for the user who requested password reset.
+    """
+    otp = set_user_otp(db, request_data.email)
+    if not otp:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # In production, send the OTP via email or SMS here.
+    return JSONResponse(content={"message": "OTP generated successfully", "otp": otp})  # Remove 'otp' from response in prod
