@@ -42,3 +42,4 @@ class User(Base):
     company_code = Column(String(50), ForeignKey("companies.code"))
     user_code = Column(String(50), unique=True)
     role_code = Column(String(50), ForeignKey("roles.code"))
+    otp = Column(String(6))
