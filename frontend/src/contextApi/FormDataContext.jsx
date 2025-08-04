@@ -9,7 +9,7 @@ export const FormDataContext = createContext({
 const FormDataProvider = ({ children }) => {
   const [subUser, setSubUser] = useState(null); // Changed to null as initial state might not be an empty string
 
-  const createSubUser = async (name, email, roleCode, userCode) => { // Updated signature
+  const createSubUser = async (name, email, roleCode,user_role_code, userCode) => { // Updated signature
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/create-sub-user",
@@ -17,6 +17,7 @@ const FormDataProvider = ({ children }) => {
           name: name,
           email: email,
           role_code: roleCode,
+          user_role_code: user_role_code,
           user_code: userCode,
         },
         {

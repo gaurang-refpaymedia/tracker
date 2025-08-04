@@ -19,6 +19,7 @@ const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [registerCompany, setRegisterCompany] = useState(null); // This state variable seems unused
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -328,6 +329,47 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const otpGenerate = async (email) => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/forgot-password",
+        {
+          email,
+        }
+      );
+
+      setForgotPasswordMessage(response.data.message);
+    } catch (error) {
+      console.error("Error in otp generations:", error);
+
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("An unknown error occurred during OTP generation.");
+      }
+    }
+  };
+
+  const forgotPassword = async (email, otp, new_password, confirm_password) => {
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/reset-password",{
+        email, otp, new_password, confirm_password
+      });
+    } catch (error) {
+      console.error("Error in reset password",error);
+
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("An unknown error occurred during OTP generation.");
+      }
+    }
+  };
+
   const authValue = {
     user,
     registerCompany, // Still present, but unused state variable
@@ -335,7 +377,10 @@ const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    forgotPasswordMessage,
     changePassword,
+    otpGenerate,
+    forgotPassword
   };
 
   return (

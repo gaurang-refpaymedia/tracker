@@ -1,12 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contextApi/AuthContext";
+import OTPGenerateModal from "./OTPGenerateModal";
 
 const LoginForm = ({ registerPath, resetPath }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError,setLoginError] = useState('');
+  const [showOTPGenerateModal, setShowOTPGenerateModal] = useState(false);
+
+  const handleShowOTPGenerateModal = (e) => {
+    e.preventDefault(); // Prevent default link behavior (e.g., scrolling to top)
+    setShowOTPGenerateModal(true);
+  };
+  const handleCloseOTPGenerateModal = () => setShowOTPGenerateModal(false);
+
+
 
   const {isLoggedIn, login} = useContext(AuthContext);
 
@@ -62,7 +72,11 @@ const LoginForm = ({ registerPath, resetPath }) => {
         </div>
         <div className="d-flex align-items-center justify-content-between">
           <div>
-            <Link to={resetPath} className="fs-11 text-primary">
+            <Link
+              to="#" // Using '#' as a placeholder for current location
+              onClick={handleShowOTPGenerateModal}
+              className="fs-11 text-primary" // Use your Dualalux text styles
+            >
               Forget password?
             </Link>
           </div>
@@ -79,6 +93,10 @@ const LoginForm = ({ registerPath, resetPath }) => {
            Create an Account
         </Link>
       </div>
+       <OTPGenerateModal
+        show={showOTPGenerateModal}
+        handleClose={handleCloseOTPGenerateModal}
+      />
     </>
   );
 };

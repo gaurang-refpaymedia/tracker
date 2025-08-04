@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { FiCalendar, FiCamera } from "react-icons/fi";
+import getIcon from "../utils/getIcon";
 import Input from "./InputComponents/Input";
 import SelectDropdown from "./InputComponents/SelectDropdown";
 import useLocationData from "../customHooks/useLocationData";
@@ -11,13 +12,11 @@ const CreateSubUserForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    // We won't send password from here, it's generated on the backend
-    role_code: "", // This will likely come from a dropdown of roles
-    // user_code is generated on the backend
+    role_code: "",
   });
 
   const { countries, fetchCountries } = useLocationData();
-  const { createSubUser } = useContext(FormDataContext);
+  const { createSubUser,subUser } = useContext(FormDataContext);
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
@@ -36,39 +35,26 @@ const CreateSubUserForm = () => {
     setSelectedOption(option);
     setFormData((prevData) => ({
       ...prevData,
-      role_code: option.value, // Assuming option has a 'value' property for the role code
+      role_code: option.value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // The backend generates the password and user_code, so we don't send them from the frontend.
-    // The `createSubUser` function in `formDataContext` takes `name`, `email`, `password`, `roleCode`, `userCode`.
-    // However, looking at your backend, it doesn't expect `password` or `userCode` from the frontend for `create_sub_user`.
-    // It generates them. So we should only pass `name`, `email`, and `role_code`.
-
-    // Assuming a placeholder for password and userCode since the context function expects them,
-    // but the backend will ignore them if it generates its own.
-    // It's better to align the `createSubUser` function in `formDataContext.jsx` with what the backend actually expects.
-
-    // Let's refine `createSubUser` call based on your backend:
-    // It expects `name`, `email`, `role_code`.
-    // `hashed_password` and `user_code` are generated in the backend.
-
     try {
       await createSubUser(
         formData.name,
         formData.email,
         formData.role_code,
+        user.role_code,
         user.user_code
       );
-      // Optionally, clear the form or show a success message
       setFormData({
         name: "",
         email: "",
         role_code: "",
       });
-      setSelectedOption(null); // Clear selected dropdown
+      setSelectedOption(null);
       alert("Sub-user created successfully!");
     } catch (error) {
       console.error("Failed to create sub-user:", error);
@@ -76,11 +62,17 @@ const CreateSubUserForm = () => {
     }
   };
 
-  // Example role options (you would fetch these from an API in a real application)
   const roleOptions = [
-    { label: "Admin", value: "admin" },
-    { label: "User", value: "user" },
-    { label: "Viewer", value: "viewer" },
+    { "label": "Super Admin", "value": "SUPER_ADMIN" },
+    { "label": "Admin", "value": "ADMIN" },
+    { "label": "Sub-Admin", "value": "SUB_ADMIN" },
+    { "label": "Publisher Manager", "value": "PUB_MANAGER" },
+    { "label": "Publisher Executive", "value": "PUB_EXEC" },
+    { "label": "Advertiser Manager", "value": "ADV_MANAGER" },
+    { "label": "Advertiser Executive", "value": "ADV_EXEC" },
+    { "label": "Financial Manager", "value": "FIN_MANAGER" },
+    { "label": "Financial Executive", "value": "FIN_EXEC" },
+    { "label": "Viewer", "value": "VIEWER" }
   ];
 
   return (
@@ -92,25 +84,31 @@ const CreateSubUserForm = () => {
               <span className="d-block mb-2">Add Sub Users:</span>
             </h5>
           </div>
-          <Input
-            icon="feather-user"
-            label={"Name"}
-            labelId={"nameInput"}
-            placeholder={"Name"}
-            name={"name"}
-            value={formData.name}
-            onChange={handleChange}
-          />
-          <Input
-            icon="feather-mail"
-            label={"Email"}
-            labelId={"emailInput"}
-            placeholder={"Email"}
-            name={"email"}
-            type={"email"}
-            value={formData.email}
-            onChange={handleChange}
-          />
+          {
+            subUser ? subUser.generatedPassword :"not generated"
+          }
+          <div className="row mb-4 align-items-center">
+            <div className="col-lg-4">
+                <label htmlFor="name" className="fw-semibold">Name: </label>
+            </div>
+            <div className="col-lg-8">
+                <div className="input-group">
+                    <div className="input-group-text">{getIcon("feather-user")}</div>
+                    <input type="text" name="name" className="form-control" id="name" placeholder="Name" value={formData.name} onChange={handleChange} />
+                </div>
+            </div>
+          </div>
+          <div className="row mb-4 align-items-center">
+            <div className="col-lg-4">
+                <label htmlFor="email" className="fw-semibold">Email: </label>
+            </div>
+            <div className="col-lg-8">
+                <div className="input-group">
+                    <div className="input-group-text">{getIcon("feather-mail")}</div>
+                    <input type="email" name="email" className="form-control" id="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+                </div>
+            </div>
+          </div>
           <div className="row mb-4 align-items-center">
             <div className="col-lg-4">
               <label className="fw-semibold">Role: </label>

@@ -17,7 +17,7 @@ const LoginCover = () => {
             <div className="wd-50 mb-5">
               <img src="/images/logo-abbr.png" alt='img' className="img-fluid" />
             </div>
-            <LoginForm registerPath={"/register"} resetPath={"/reset"}/>
+            <LoginForm registerPath={"/register"} resetPath={"/forgot-password"}/>
           </div>
         </div>
       </div>
