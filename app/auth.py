@@ -1,9 +1,13 @@
+# app/auth.py --
 from passlib.context import CryptContext
 from fastapi import Request, HTTPException, status
 from typing import Dict, Optional
-
+from sqlalchemy.orm import Session
+from app.models import User
+from subuser.models import SubUser
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -11,39 +15,61 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+
 # Dependency to get the current user from the session
-async def get_current_user(request: Request) -> Dict:
+async def get_current_user(request: Request, db: Session) -> Dict:
     """
     Retrieves the current authenticated user's session data.
-    Raises HTTPException if user data is not found in session.
+    Raises HTTPException if user data is not found in session or user no longer exists.
     """
     user_data = request.session.get("user")
-    print("==========================================================")
-    print(user_data)
-    print("==========================================================")
     if not user_data:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated. Please log in.",
             headers={"WWW-Authenticate": "Session"},
         )
+    
+    # Optional: re-validate user still exists in DB
+    if user_data.get("user_type") == "super_admin":
+        user = db.query(User).filter(User.user_code == user_data.get("user_code")).first()
+    else:
+        user = db.query(SubUser).filter(SubUser.user_code == user_data.get("user_code")).first()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="User session invalid. Please log in again.")
+
     return user_data
 
-# In a real app, this would query your database
-async def authenticate_user(db, username: str, password: str) -> Optional[Dict]:
+
+# Auth function — checks User (SUPER_ADMIN) first, then SubUser (others)
+async def authenticate_user(db: Session, username: str, password: str) -> Optional[Dict]:
     """
-    Authenticates a user.
-    Returns a dictionary with user data (e.g., {'user_code': '...', 'hashed_password': '...'})
-    if authentication is successful, otherwise None.
+    Authenticates a user from either User (super_admin) or SubUser (all others) table.
+    Returns a dictionary with user data if successful, else None.
     """
-    # Simulate fetching user from DB (replace with actual DB query)
-    # Example: In a real app, you'd fetch by username and check password
-    if username == "testuser" and password == "Admin1234": # DANGER: Don't store plain passwords!
-        # In a real app, you'd fetch the hashed password from DB and verify_password
-        # For this example, we'll assume a known user and just return a user_code
-        return {"user_code": "user123", "username": "testuser", "hashed_password": get_password_hash("Admin1234")}
-    elif username == "anotheruser" and password == "SecurePass1":
-        return {"user_code": "user456", "username": "anotheruser", "hashed_password": get_password_hash("SecurePass1")}
+    # SUPER_ADMIN lookup from users table
+    user = db.query(User).filter(User.email == username).first()
+    if user and verify_password(password, user.hashed_password):
+        return {
+            "user_code": user.user_code,
+            "username": user.email,
+            "company_code": user.company_code,
+            "role_code": user.role_code,
+            "user_type": "super_admin",
+        }
+
+    # Other roles from subusers table
+    subuser = db.query(SubUser).filter(SubUser.email == username).first()
+    if subuser and verify_password(password, subuser.hashed_password):
+        return {
+            "user_code": subuser.user_code,
+            "username": subuser.email,
+            "company_code": subuser.company_code,
+            "role_code": subuser.role_code,
+            "user_type": "subuser",
+        }
+
     return None
 
 
