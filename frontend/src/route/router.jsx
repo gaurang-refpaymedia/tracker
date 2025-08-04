@@ -6,6 +6,8 @@ import { Dashboard } from "../pages/Dashboard";
 import Register from "../pages/Register";
 import ProtectedRoute from "./ProtectedLayout";
 import ChangePassword from "../pages/ChangePassword";
+import ForgotPassword from "../pages/ForgotPassword";
+import { SubUser } from "../pages/SubUser";
 
 export const router = createBrowserRouter([
     {
@@ -24,6 +26,10 @@ export const router = createBrowserRouter([
                 path: "/change-password",
                 element: <ChangePassword/>
             },
+            {
+                path: "/create-sub-user",
+                element: <SubUser/>
+            }
         ]
     },
     {
@@ -38,6 +44,10 @@ export const router = createBrowserRouter([
                 path: "/register",
                 element: <Register/>
             },
+            {
+                path: "/forgot-password",
+                element: <ForgotPassword/>
+            }
         ]
     }
 ])

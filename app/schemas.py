@@ -14,6 +14,7 @@ class UserLogin(BaseModel):
     password: str
 
 class PasswordChangeRequest(BaseModel):
+    user_code: str # Add this line to accept user_code from the frontend
     old_password: str
     new_password: str = Field(..., min_length=8)
 

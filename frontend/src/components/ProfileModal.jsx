@@ -25,6 +25,10 @@ const ProfileModal = ({user}) => {
                     <i><FiSettings /></i>
                     <span>Change Password</span>
                 </Link>
+                <Link to={'/create-sub-user'} className="dropdown-item">
+                    <i><FiSettings /></i>
+                    <span>Create Sub User</span>
+                </Link>
                 <div className="dropdown-divider"></div>
                 <button onClick={logout} type='button' className="dropdown-item">
                     <i> <FiLogOut /></i>

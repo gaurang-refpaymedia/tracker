@@ -12,13 +12,14 @@ export const AuthContext = createContext({
     super_user_email
   ) => {},
   logout: () => {},
-  changePassword: async (oldPassword, newPassword) => {}, // Added to context type
+  changePassword: async (userCode, oldPassword, newPassword) => {}, // Added to context type
 });
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [registerCompany, setRegisterCompany] = useState(null); // This state variable seems unused
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [forgotPasswordMessage, setForgotPasswordMessage] = useState("");
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -39,7 +40,7 @@ const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/login", // IMPORTANT: Verify this URL in your FastAPI routes.
-                                          // Is it `/api/login` or `/users/api/login`?
+        // Is it `/api/login` or `/users/api/login`?
         new URLSearchParams({ email, password }).toString(),
         {
           headers: {
@@ -223,9 +224,9 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const changePassword = async (oldPassword, newPassword) => {
+  const changePassword = async (userCode, oldPassword, newPassword) => {
     try {
-      if (!oldPassword || !newPassword) {
+      if (!userCode || !oldPassword || !newPassword) {
         console.error("Old password and new password are required.");
         return { success: false, message: "Please fill in all fields." };
       }
@@ -233,6 +234,7 @@ const AuthProvider = ({ children }) => {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/change-password", // IMPORTANT: Verify this URL in your FastAPI routes.
         {
+          user_code: userCode,
           old_password: oldPassword,
           new_password: newPassword,
         },
@@ -306,9 +308,13 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // ADDED THIS LINE HERE
-      const response = await axios.post("http://127.0.0.1:8000/api/logout", {}, {
-        withCredentials: true, // This is essential for logout to work with session cookies
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/logout",
+        {},
+        {
+          withCredentials: true, // This is essential for logout to work with session cookies
+        }
+      );
       console.log(response.data);
 
       if (response.data.message === "Successfully logged out") {
@@ -323,6 +329,47 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const otpGenerate = async (email) => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/forgot-password",
+        {
+          email,
+        }
+      );
+
+      setForgotPasswordMessage(response.data.message);
+    } catch (error) {
+      console.error("Error in otp generations:", error);
+
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("An unknown error occurred during OTP generation.");
+      }
+    }
+  };
+
+  const forgotPassword = async (email, otp, new_password, confirm_password) => {
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/reset-password",{
+        email, otp, new_password, confirm_password
+      });
+    } catch (error) {
+      console.error("Error in reset password",error);
+
+      if (error.response && error.response.data && error.response.data.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error("An unknown error occurred during OTP generation.");
+      }
+    }
+  };
+
   const authValue = {
     user,
     registerCompany, // Still present, but unused state variable
@@ -330,7 +377,10 @@ const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    forgotPasswordMessage,
     changePassword,
+    otpGenerate,
+    forgotPassword
   };
 
   return (
