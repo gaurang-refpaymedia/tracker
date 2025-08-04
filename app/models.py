@@ -88,5 +88,3 @@ class Timezone(Base):
     code = Column(String(100), unique=True, nullable=False)
     advertisers_by_timezone = relationship("Advertiser", back_populates="adv_timezone")
     
-
-from subuser.models import SubUser

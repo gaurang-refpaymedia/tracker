@@ -89,12 +89,14 @@ async def change_password(
         raise HTTPException(status_code=500, detail="Could not update password. Please try again later.")
     
     
+from fastapi import Response  # at the top if not already
+from typing import Annotated
 
-@router.post("/api/create-sub-user")
+@router.post("/api/create-sub-user", response_model=None)
 async def create_sub_user(
     user_data: SubUserCreate,
-    db: Session = Depends(get_db),
-    current_user: dict = Depends(auth.get_current_user)
+    db: Annotated[Session, Depends(get_db)],
+    current_user = Depends(auth.get_current_user)
 ):
     try:
         super_user_code = current_user.get("user_code")

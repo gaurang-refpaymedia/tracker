@@ -37,9 +37,9 @@ class SubUserResponse(BaseModel):
     active_state: bool
     phone: Optional[str] = None
 
-    class Config:
-        orm_mode = True
-        
+    model_config = {
+        "from_attributes": True
+    }
 
 
 class SubUserLogin(BaseModel):

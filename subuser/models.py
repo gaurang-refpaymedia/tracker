@@ -3,7 +3,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models import Role, Company
 
 
 class SubUser(Base):

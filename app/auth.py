@@ -5,6 +5,9 @@ from typing import Dict, Optional
 from sqlalchemy.orm import Session
 from app.models import User
 from subuser.models import SubUser
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from app.database import get_db  # or your correct import path
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -17,7 +20,10 @@ def get_password_hash(password):
 
 
 # Dependency to get the current user from the session
-async def get_current_user(request: Request, db: Session) -> Dict:
+async def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db)
+) -> Dict:
     """
     Retrieves the current authenticated user's session data.
     Raises HTTPException if user data is not found in session or user no longer exists.

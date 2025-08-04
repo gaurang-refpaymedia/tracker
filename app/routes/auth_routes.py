@@ -8,6 +8,9 @@ from ..auth import get_current_user
 from pydantic import BaseModel, EmailStr
 import random
 import string
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -39,9 +42,8 @@ def set_user_otp(db: Session, email: str):
 
 # === Utility: Authenticate User/SubUser ===
 def authenticate_user(email: str, password: str, db: Session):
-    # Assuming password is already hashed before being passed here
     user = db.query(models.User).filter(models.User.email == email).first()
-    if user and password == user.hashed_password:
+    if user and pwd_context.verify(password, user.hashed_password):
         return {
             "email": user.email,
             "name": user.name,
@@ -51,7 +53,7 @@ def authenticate_user(email: str, password: str, db: Session):
         }
 
     subuser = db.query(SubUser).filter(SubUser.email == email).first()
-    if subuser and password == subuser.hashed_password:
+    if subuser and pwd_context.verify(password, subuser.hashed_password):
         return {
             "email": subuser.email,
             "name": subuser.name,
