@@ -156,6 +156,10 @@ def forgot_password(request_data: ForgotPasswordRequest, db: Session = Depends(g
 
 
 
+from app import auth
+from app.schemas import ResetPasswordRequest
+
+
 @router.post("/api/reset-password")
 def reset_password_api(
     request_data: ResetPasswordRequest,
