@@ -1,3 +1,5 @@
+# app/roles_reference.py --
+
 USER_ROLES = {
     "Super Admin" : "SUPER_ADMIN",
     "Admin" : "ADMIN",

@@ -37,7 +37,7 @@
         <h2 class="text-center mb-4">Register New Company</h2>
 
         <!-- Registration Form -->
-        <form method="post" action="/register-company" id="register-form">
+        <form method="post" action="/api/register-company" id="register-form">
           <!-- Company Name -->
           <div class="mb-3">
             <label for="company_name" class="form-label">Company Name</label>
@@ -78,7 +78,7 @@
         </form>
 
         <div class="text-center mt-3">
-          <p>Already have an account? <a href="/" class="text-decoration-none">Login here</a></p>
+          <p>Already have an account? <a href="/api/" class="text-decoration-none">Login here</a></p>
         </div>
       </div>
     </div>
@@ -93,7 +93,7 @@
   <script>
     // Load subscription options dynamically
     async function loadSubscriptionOptions() {
-      const response = await fetch('/subscriptions');
+      const response = await fetch('/api/subscriptions');
       const subscriptions = await response.json();
 
       const subscriptionContainer = document.getElementById('subscription-options');
@@ -141,7 +141,7 @@
       // Only check if code is not empty
       if (companyCode.length > 0) {
         try {
-          const response = await fetch(`/check-company-code/${companyCode}`);
+          const response = await fetch(`/api/check-company-code/${companyCode}`);
           const data = await response.json();
 
           if (data.exists) {
@@ -200,7 +200,7 @@
       const formData = new FormData(registerForm); // Collect form data
 
       try {
-        const response = await fetch('/register-company', {
+        const response = await fetch('/api/register-company', {
           method: 'POST',
           body: formData // FormData handles setting the correct Content-Type
         });
@@ -221,13 +221,13 @@
 
             // Set redirect after the modal is hidden
             const modalHiddenListener = function () {
-              window.location.href = data.redirect_url || '/';
+              window.location.href = data.redirect_url || '/api/';
               passwordModalElement.removeEventListener('hidden.bs.modal', modalHiddenListener);
             };
             passwordModalElement.addEventListener('hidden.bs.modal', modalHiddenListener);
           } else {
             // If modal or input not found, fallback to direct redirect
-            window.location.href = data.redirect_url || '/';
+            window.location.href = data.redirect_url || '/api/';
           }
 
         } else {
