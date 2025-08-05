@@ -18,11 +18,15 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 app = FastAPI()
 
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, same_site="lax", https_only=False)
+
 # Add CORS middleware to allow cross-origin requests
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # match your frontend URL
@@ -32,7 +36,6 @@ app.add_middleware(
 )
 
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, same_site="none", https_only=False)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 

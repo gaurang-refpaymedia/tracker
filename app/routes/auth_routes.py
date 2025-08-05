@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Depends, HTTPException
+from fastapi import APIRouter, Request, Form, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -9,14 +9,19 @@ from pydantic import BaseModel, EmailStr
 import random
 import string
 from passlib.context import CryptContext
+import logging
+from typing import Annotated
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+logger = logging.getLogger(__name__)
 
 # === Dependency for DB session ===
 def get_db():
+    
     db = database.SessionLocal()
     try:
         yield db
@@ -53,7 +58,7 @@ def authenticate_user(email: str, password: str, db: Session):
         }
 
     subuser = db.query(SubUser).filter(SubUser.email == email).first()
-    if subuser and pwd_context.verify(password, subuser.hashed_password):
+    if subuser and pwd_context.verify(password, subuser.password):
         return {
             "email": subuser.email,
             "name": subuser.name,
@@ -64,40 +69,80 @@ def authenticate_user(email: str, password: str, db: Session):
 
     return None
 
-# === Utility: Create user session and cookie ===
-def create_user_session(request: Request, user_data: dict):
-    request.session["user"] = user_data
-    response = JSONResponse(content=user_data, status_code=200)
-    response.set_cookie(
-        key="session",
-        value=request.session.get("user"),
-        httponly=True,
-        samesite="None",
-        secure=False
-    )
-    return response
+# # === Utility: Create user session and cookie ===
+# def create_user_session(request: Request, user_data: dict):
+#     request.session["user"] = user_data
+#     response = JSONResponse(content=user_data, status_code=200)
+#     response.set_cookie(
+#         key="session",
+#         value=request.session.get("user"),
+#         httponly=True,
+#         samesite="None",
+#         secure=False
+#     )
+#     return response
 
 # === Route: Login Page ===
 @router.get("/api/")
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
-# === Route: Login ===
+# # === Route: Login ===
+# @router.post("/api/login")
+# def login(
+#     request: Request,
+#     db: Session = Depends(get_db),
+#     email: str = Form(...),
+#     password: str = Form(...),
+# ):
+#     try:
+#         user_data = authenticate_user(email, password, db)
+#         if not user_data:
+#             return JSONResponse(content={"error": "Invalid Email or Password"}, status_code=401)
+#         return create_user_session(request, user_data)
+#     except Exception as e:
+#         print(f"Error in /login: {e}")
+#         return JSONResponse(content={"error": f"Internal server error: {e}"}, status_code=500)
+
+
+
 @router.post("/api/login")
 def login(
     request: Request,
-    db: Session = Depends(get_db),
-    email: str = Form(...),
-    password: str = Form(...),
+    db: Annotated[Session, Depends(get_db)],
+    email: Annotated[str, Form(...)],
+    password: Annotated[str, Form(...)],
 ):
+    """
+    Authenticates a user and sets a session cookie.
+    """
     try:
+        # Step 1: Authenticate the user with your custom function
         user_data = authenticate_user(email, password, db)
         if not user_data:
-            return JSONResponse(content={"error": "Invalid Email or Password"}, status_code=401)
-        return create_user_session(request, user_data)
+            return JSONResponse(
+                content={"error": "Invalid Email or Password"},
+                status_code=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Step 2: Crucially, set the user data in the session
+        # This is the step that makes the session available for all future requests
+        # and allows `get_current_user` to succeed.
+        request.session["user"] = user_data
+        # Step 3: Return a success message
+        return JSONResponse(
+            content={"message": "Login successful"},
+            status_code=status.HTTP_200_OK
+        )
+
     except Exception as e:
-        print(f"Error in /login: {e}")
-        return JSONResponse(content={"error": f"Internal server error: {e}"}, status_code=500)
+        logger.error(f"Error in /login: {e}")
+        return JSONResponse(
+            content={"error": "Internal server error"},
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
 
 # === Route: Dashboard (Role-Based Data) ===
 @router.get("/api/dashboard")

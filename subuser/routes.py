@@ -2,15 +2,34 @@
 
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Annotated
 from . import schemas, crud
 from app import database
-from app.models import User
+import app.models as models
 from subuser.models import SubUser
 from passlib.context import CryptContext
+import app.auth as auth
 
-router = APIRouter(prefix="/subusers", tags=["SubUsers"])
+router = APIRouter(prefix="/api/subusers", tags=["SubUsers"])
+
+def generate_random_password(length=12):
+    return "Admin1234"
+
+def generate_user_code(company_code: str, existing_codes: list[str]) -> str:
+    if not company_code:
+        raise ValueError("company_code must not be empty.")
+
+    prefix = ''.join(filter(str.isalpha, company_code)).upper()[:2]
+    if not prefix:
+        prefix = company_code.upper()[:2]
+    if not prefix:
+        raise ValueError("company_code must contain at least 2 characters (alphabetic or numeric).")
+
+    numbers = [int(code[len(prefix):]) for code in existing_codes if code.startswith(prefix) and code[len(prefix):].isdigit()]
+    next_number = max(numbers, default=-1) + 1
+    return f"{prefix}{next_number:03d}"
 
 get_db = database.get_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,11 +40,11 @@ def get_current_identity(request: Request, db: Session = Depends(get_db)):
     if not user_data:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    user_type = user_data.get("user_type")
+    role_code = user_data.get("role_code")
     user_code = user_data.get("user_code")
 
-    if user_type == "super_admin":
-        user = db.query(User).filter(User.user_code == user_code).first()
+    if role_code == "SUPER_ADMIN":
+        user = db.query(models.User).filter(models.User.user_code == user_code).first()
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         return user
@@ -56,26 +75,80 @@ def get_subuser(
     return subuser
 
 
-@router.post("/", response_model=schemas.SubUserResponse)
-def create_subuser(
-    subuser: schemas.SubUserCreate,
-    db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+@router.post("/create-sub-user", response_model=schemas.SubUserResponse)
+async def create_sub_user(
+    user_data: schemas.SubUserCreate,
+    db: Annotated[Session, Depends(get_db)],
+    current_user = Depends(auth.get_current_user)
 ):
-    # Only SUPER_ADMIN can create sub-users
-    if current_identity.role_code != "SUPER_ADMIN":
-        raise HTTPException(status_code=403, detail="Only SUPER_ADMIN can create sub-users")
+    try:
+        super_user_code = current_user.get("user_code")
+        if not super_user_code:
+            raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # Check email uniqueness across both tables
-    existing_user = db.query(User).filter(User.email == subuser.email).first()
-    existing_subuser = db.query(SubUser).filter(SubUser.email == subuser.email).first()
-    if existing_user or existing_subuser:
-        raise HTTPException(status_code=400, detail="Email already exists")
+        super_user = db.query(models.User).filter(models.User.user_code == super_user_code).first()
+        if not super_user:
+            raise HTTPException(status_code=404, detail="Super admin not found")
 
-    # Hash password before storing
-    subuser.password = pwd_context.hash(subuser.password)
+        # Only SUPER_ADMIN can create sub-users
+        if super_user.role_code != "SUPER_ADMIN":
+            raise HTTPException(status_code=403, detail="Only super admins can create sub-users")
 
-    return crud.create_subuser(db, subuser, current_identity.company_code, current_identity.user_code)
+        company = db.query(models.Company).filter(models.Company.code == super_user.company_code).first()
+        if not company:
+            raise HTTPException(status_code=404, detail="Company not found")
+
+        subscription = db.query(models.Subscription).filter(models.Subscription.code == company.subscription_code).first()
+        if not subscription:
+            raise HTTPException(status_code=404, detail="Subscription not found")
+
+        user_count = db.query(models.User).filter(models.User.company_code == company.code).count()
+        sub_user_count = db.query(SubUser).filter(SubUser.company_code == company.code).count()
+        total_user_count = user_count + sub_user_count
+
+        if total_user_count >= subscription.max_users:
+            raise HTTPException(status_code=400, detail="User limit reached for this company")
+        
+        existing_codes_user = [user.user_code for user in db.query(models.User).filter(models.User.company_code == company.code).all()]
+        existing_codes_subuser = [user.user_code for user in db.query(SubUser).filter(SubUser.company_code == company.code).all()]
+        existing_codes = existing_codes_user + existing_codes_subuser
+        # Assuming `generate_user_code` is defined and imported elsewhere
+        new_user_code = generate_user_code(company.code, existing_codes)
+
+        # Check for email in both User and SubUser tables
+        email_in_users = db.query(models.User).filter(models.User.email == user_data.email).first()
+        email_in_subusers = db.query(SubUser).filter(SubUser.email == user_data.email).first()
+        if email_in_users or email_in_subusers:
+            raise HTTPException(status_code=400, detail="Email already in use")
+
+        # IMPORTANT CHANGE: Hash the password provided from the frontend
+        # This replaces the previous logic that generated a random password
+        hashed_password = auth.get_password_hash(user_data.password)
+
+        new_sub_user = SubUser(
+            name=user_data.name,
+            email=user_data.email,
+            company_code=company.code,
+            role_code=user_data.role_code,
+            user_code=new_user_code,
+            # The password attribute should be set to the hashed password
+            password=hashed_password
+        )
+        db.add(new_sub_user)
+        db.commit()
+        db.refresh(new_sub_user)
+
+        return JSONResponse(
+            content={"message": "Sub-user created successfully", "user_code": new_user_code},
+            status_code=201
+        )
+
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        db.rollback()
+        print("❗ Unexpected error:", str(e))
+        raise HTTPException(status_code=500, detail="Could not create sub-user. Try again later.")
 
 
 @router.put("/{subuser_id}", response_model=schemas.SubUserResponse)
@@ -143,7 +216,6 @@ def subuser_login(credentials: schemas.SubUserLogin, request: Request, db: Sessi
     # Set user info in session cookie for session-based auth
     request.session["user"] = {
         "user_code": subuser.user_code,
-        "user_type": "subuser",
         "company_code": subuser.company_code,
         "role_code": subuser.role_code,
         "email": subuser.email,

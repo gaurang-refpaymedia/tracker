@@ -15,7 +15,7 @@ const DataProvider = ({ children }) => {
 
     const subscriptionsItems = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/api/subscriptions');
+            const response = await axios.get('http://localhost:8000/api/subscriptions');
             setSubscriptions(response.data);
         } catch (error) {
             console.error("Error fetching subscriptions:", error);
@@ -30,7 +30,7 @@ const DataProvider = ({ children }) => {
         console.log("DataContext: Attempting to check company code:", companyCode);
         try {
             const response = await axios.get(
-                `http://127.0.0.1:8000/api/check-company-code/${companyCode}`
+                `http://localhost:8000/api/check-company-code/${companyCode}`
             );
             // --- LOG THE RAW API RESPONSE DATA ---
             console.log("DataContext: Raw API Response Data:", response.data);
