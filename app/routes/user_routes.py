@@ -58,15 +58,15 @@ async def change_password(
         if not user_in_db:
             raise HTTPException(status_code=404, detail="User not found.")
 
-        if not user_in_db.hashed_password:
+        if not user_in_db.password:
             raise HTTPException(status_code=500, detail="User has no password set in DB.")
 
-        if not auth.verify_password(request_data.old_password, user_in_db.hashed_password):
+        if not auth.verify_password(request_data.old_password, user_in_db.password):
             raise HTTPException(status_code=400, detail="Incorrect old password.")
 
-        new_hashed_password = auth.get_password_hash(request_data.new_password)
+        new_password = auth.get_password_hash(request_data.new_password)
 
-        user_in_db.hashed_password = new_hashed_password
+        user_in_db.password = new_password
 
         db.add(user_in_db)
         db.commit()
@@ -139,7 +139,7 @@ async def create_sub_user(
 
         # Create SubUser entry
         generated_password = generate_random_password()
-        hashed_password = auth.get_password_hash(generated_password)
+        password = auth.get_password_hash(generated_password)
 
         new_sub_user = SubUser(
             name=user_data.name,
@@ -147,7 +147,7 @@ async def create_sub_user(
             company_code=company.code,
             role_code=user_data.role_code,
             user_code=new_user_code,
-            hashed_password=hashed_password
+            password=password
         )
         db.add(new_sub_user)
         db.commit()

@@ -43,7 +43,7 @@ def set_user_otp(db: Session, email: str):
 # === Utility: Authenticate User/SubUser ===
 def authenticate_user(email: str, password: str, db: Session):
     user = db.query(models.User).filter(models.User.email == email).first()
-    if user and pwd_context.verify(password, user.hashed_password):
+    if user and pwd_context.verify(password, user.password):
         return {
             "email": user.email,
             "name": user.name,
@@ -53,7 +53,7 @@ def authenticate_user(email: str, password: str, db: Session):
         }
 
     subuser = db.query(SubUser).filter(SubUser.email == email).first()
-    if subuser and pwd_context.verify(password, subuser.hashed_password):
+    if subuser and pwd_context.verify(password, subuser.password):
         return {
             "email": subuser.email,
             "name": subuser.name,
@@ -179,7 +179,7 @@ def reset_password_api(
         raise HTTPException(status_code=400, detail="Passwords do not match")
 
     # Hash and update password
-    user.hashed_password = auth.pwd_context.hash(request_data.new_password)
+    user.password = auth.pwd_context.hash(request_data.new_password)
     user.otp = None  # Clear OTP
     db.commit()
 

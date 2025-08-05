@@ -89,7 +89,7 @@ def register_company(request: Request,
     db_user = User(
         name=super_user_name,
         email=super_user_email,
-        hashed_password=hashed_user_password,
+        password=hashed_user_password,
         company_code=db_company.code,
         user_code=super_user_code,
         role_code=super_admin_role_code

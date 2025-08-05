@@ -44,3 +44,7 @@ app.include_router(subscription_routes.router)
 app.include_router(user_routes.router)
 app.include_router(advertiser_routes.router)
 app.include_router(subuser_routes.router)
+
+
+# alembic revision -m "change hashed_password to password in models"
+# alembic upgrade head

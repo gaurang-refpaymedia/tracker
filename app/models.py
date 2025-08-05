@@ -51,7 +51,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100))
     email = Column(String(100), unique=True)
-    hashed_password = Column(String(200))
+    password = Column(String(200))
     company_code = Column(String(50), ForeignKey("companies.code"))
     user_code = Column(String(50), unique=True)
     role_code = Column(String(50), ForeignKey("roles.code"))

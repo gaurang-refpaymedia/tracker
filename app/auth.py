@@ -12,8 +12,8 @@ from app.database import get_db  # or your correct import path
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password, password):
+    return pwd_context.verify(plain_password, password)
 
 def get_password_hash(password):
     return pwd_context.hash(password)
@@ -56,7 +56,7 @@ async def authenticate_user(db: Session, username: str, password: str) -> Option
     """
     # SUPER_ADMIN lookup from users table
     user = db.query(User).filter(User.email == username).first()
-    if user and verify_password(password, user.hashed_password):
+    if user and verify_password(password, user.password):
         return {
             "user_code": user.user_code,
             "username": user.email,
@@ -67,7 +67,7 @@ async def authenticate_user(db: Session, username: str, password: str) -> Option
 
     # Other roles from subusers table
     subuser = db.query(SubUser).filter(SubUser.email == username).first()
-    if subuser and verify_password(password, subuser.hashed_password):
+    if subuser and verify_password(password, subuser.password):
         return {
             "user_code": subuser.user_code,
             "username": subuser.email,
