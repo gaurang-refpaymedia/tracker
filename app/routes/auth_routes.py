@@ -131,7 +131,7 @@ def login(
         request.session["user"] = user_data
         # Step 3: Return a success message
         return JSONResponse(
-            content={"message": "Login successful"},
+            content=user_data,
             status_code=status.HTTP_200_OK
         )
 
