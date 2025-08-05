@@ -46,6 +46,7 @@ const AuthProvider = ({ children }) => {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
+          credentials: "include",
           withCredentials: true, // This is correctly set for login
         }
       );
@@ -58,10 +59,10 @@ const AuthProvider = ({ children }) => {
 
       if (response.status >= 200 && response.status < 300) {
         console.log("AuthContext: Login successful, parsed data:", parsedData);
-        setUser(parsedData);
+        setUser(parsedData.user_data);
         setIsLoggedIn(true);
-        localStorage.setItem("user", JSON.stringify(parsedData));
-        return { success: true, user: parsedData };
+        localStorage.setItem("user", JSON.stringify(parsedData.user_data));
+        return { success: true, user: parsedData.user_data };
       } else {
         console.error(
           "AuthContext: Login failed, server error:",

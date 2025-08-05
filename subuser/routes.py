@@ -60,6 +60,7 @@ def get_subusers(
     db: Session = Depends(get_db),
     current_identity=Depends(get_current_identity),
 ):
+    print(current_identity)
     return crud.get_all_subusers_for_company(db, current_identity.company_code)
 
 
@@ -67,7 +68,7 @@ def get_subusers(
 def get_subuser(
     subuser_id: int,
     db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+    current_identity=Depends(auth.get_current_user),
 ):
     subuser = crud.get_subuser_by_id(db, subuser_id)
     if not subuser or subuser.company_code != current_identity.company_code:

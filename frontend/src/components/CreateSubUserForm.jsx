@@ -4,8 +4,8 @@ import getIcon from '../utils/getIcon'; // Assuming this is a utility to get ico
 import Input from './InputComponents/Input'; // Assuming these are valid components
 import SelectDropdown from './InputComponents/SelectDropdown'; // Assuming this is a valid component
 import useLocationData from '../customHooks/useLocationData'; // Assuming this is a valid hook
-import { FormDataContext } from '../contextApi/FormDataContext';
 import { AuthContext } from '../contextApi/AuthContext';
+import { SubUserContext } from '../contextApi/subuserContext/SubUserContext';
 import { formToJSON } from 'axios';
 
 const CreateSubUserForm = () => {
@@ -23,7 +23,7 @@ const CreateSubUserForm = () => {
 
   // useLocationData is assumed to be a custom hook that provides a memoized fetchCountries function
   const { countries, fetchCountries } = useLocationData();
-  const { createSubUser, subUser } = useContext(FormDataContext);
+  const { createSubUser, subUser } = useContext(SubUserContext);
   const { user } = useContext(AuthContext); // user is used for debugging and context but not passed to backend call
 
   useEffect(() => {
