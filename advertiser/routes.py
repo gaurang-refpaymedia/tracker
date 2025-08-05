@@ -19,10 +19,10 @@ def get_current_identity(request, db: Session = Depends(get_db)) -> Union[User, 
     if not user_data:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
-    user_type = user_data.get("user_type")
+    role_code = user_data.get("role_code")
     user_code = user_data.get("user_code")
 
-    if user_type == "super_admin":
+    if role_code == "SUPER_ADMIN":
         user = db.query(User).filter(User.user_code == user_code).first()
         if not user:
             raise HTTPException(status_code=401, detail="User not found")

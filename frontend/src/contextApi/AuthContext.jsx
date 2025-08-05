@@ -39,7 +39,7 @@ const AuthProvider = ({ children }) => {
     console.log("AuthContext: Attempting login for email:", email);
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/login", // IMPORTANT: Verify this URL in your FastAPI routes.
+        "http://localhost:8000/api/login", // IMPORTANT: Verify this URL in your FastAPI routes.
         // Is it `/api/login` or `/users/api/login`?
         new URLSearchParams({ email, password }).toString(),
         {
@@ -110,7 +110,7 @@ const AuthProvider = ({ children }) => {
   ) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/register-company", // IMPORTANT: Verify this URL in your FastAPI routes.
+        "http://localhost:8000/api/register-company", // IMPORTANT: Verify this URL in your FastAPI routes.
         new URLSearchParams({
           company_name,
           company_code,
@@ -232,7 +232,7 @@ const AuthProvider = ({ children }) => {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/change-password", // IMPORTANT: Verify this URL in your FastAPI routes.
+        "http://localhost:8000/api/change-password", // IMPORTANT: Verify this URL in your FastAPI routes.
         {
           user_code: userCode,
           old_password: oldPassword,
@@ -309,7 +309,7 @@ const AuthProvider = ({ children }) => {
     try {
       // ADDED THIS LINE HERE
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/logout",
+        "http://localhost:8000/api/logout",
         {},
         {
           withCredentials: true, // This is essential for logout to work with session cookies
@@ -332,7 +332,7 @@ const AuthProvider = ({ children }) => {
   const otpGenerate = async (email) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/forgot-password",
+        "http://localhost:8000/api/forgot-password",
         {
           email,
         }
@@ -354,7 +354,7 @@ const AuthProvider = ({ children }) => {
 
   const forgotPassword = async (email, otp, new_password, confirm_password) => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/reset-password",{
+      const response = await axios.post("http://localhost:8000/api/reset-password",{
         email, otp, new_password, confirm_password
       });
     } catch (error) {

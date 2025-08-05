@@ -37,14 +37,14 @@ async def get_current_user(
         )
     
     # Optional: re-validate user still exists in DB
-    if user_data.get("user_type") == "super_admin":
+    if user_data.get("role_code") == "SUPER_ADMIN":
         user = db.query(User).filter(User.user_code == user_data.get("user_code")).first()
     else:
         user = db.query(SubUser).filter(SubUser.user_code == user_data.get("user_code")).first()
-
     if not user:
         raise HTTPException(status_code=401, detail="User session invalid. Please log in again.")
-
+    
+    print(user_data)
     return user_data
 
 
@@ -62,7 +62,6 @@ async def authenticate_user(db: Session, username: str, password: str) -> Option
             "username": user.email,
             "company_code": user.company_code,
             "role_code": user.role_code,
-            "user_type": "super_admin",
         }
 
     # Other roles from subusers table
@@ -73,7 +72,6 @@ async def authenticate_user(db: Session, username: str, password: str) -> Option
             "username": subuser.email,
             "company_code": subuser.company_code,
             "role_code": subuser.role_code,
-            "user_type": "subuser",
         }
 
     return None

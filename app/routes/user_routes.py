@@ -1,6 +1,6 @@
 # app/routes/user_routes.py --
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from fastapi import status
@@ -8,6 +8,7 @@ from subuser.models import SubUser
 from subuser.schemas import SubUserCreate
 from .. import models, schemas, auth
 from ..database import get_db
+from typing import Annotated
 
 router = APIRouter(tags=["users"])
 
@@ -88,9 +89,7 @@ async def change_password(
         db.rollback() # Rollback in case of an unexpected error
         raise HTTPException(status_code=500, detail="Could not update password. Please try again later.")
     
-    
-from fastapi import Response  # at the top if not already
-from typing import Annotated
+
 
 @router.post("/api/create-sub-user", response_model=None)
 async def create_sub_user(

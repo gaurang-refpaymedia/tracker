@@ -1,52 +1,47 @@
-import axios from "axios";
-import { createContext } from "react";
-import { useContext, useState } from "react";
+import axios from 'axios';
+import { createContext, useContext, useState } from 'react';
 
 export const FormDataContext = createContext({
-    createSubUser: async (name, email, roleCode, userCode) => {}, // Updated signature
+  // The signature is simplified, as user details are handled by the backend
+  createSubUser: async (name, email, roleCode, password) => {}, 
 });
 
 const FormDataProvider = ({ children }) => {
-  const [subUser, setSubUser] = useState(null); // Changed to null as initial state might not be an empty string
+  const [subUser, setSubUser] = useState(null); 
 
-  const createSubUser = async (name, email, roleCode,user_role_code, userCode) => { // Updated signature
+  // Updated function to not accept user_role_code and userCode from the client
+  const createSubUser = async (name, email, roleCode, password) => {
     try {
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/create-sub-user",
+        'http://localhost:8000/api/subusers/create-sub-user',
         {
           name: name,
           email: email,
           role_code: roleCode,
-          user_role_code: user_role_code,
-          user_code: userCode,
+          password
         },
         {
           withCredentials: true,
         }
       );
 
-      // Check for successful status codes (e.g., 201 Created) rather than just response.data.status_code
+      // Check for successful status codes (e.g., 201 Created)
       if (response.status === 201) {
-        console.log("Sub user created successfully", response.data);
+        console.log('Sub user created successfully', response.data);
         setSubUser(response.data);
         return response.data; // Return data for potential success message in component
       } else {
-        // Handle other successful but non-201 status codes if needed
-        console.warn("Unexpected status code:", response.status, response.data);
-        throw new Error(response.data.detail || "Sub-user creation failed with unexpected status.");
+        console.warn('Unexpected status code:', response.status, response.data);
+        throw new Error(response.data.detail || 'Sub-user creation failed with an unexpected status.');
       }
     } catch (error) {
-      console.error("Error creating the sub user:", error.response ? error.response.data : error.message);
+      console.error('Error creating the sub user:', error.response ? error.response.data : error.message);
       throw error; // Re-throw to be caught by the component
     }
   };
 
   const formValue = { subUser, createSubUser };
-  return (
-    <FormDataContext.Provider value={formValue}>
-      {children}
-    </FormDataContext.Provider>
-  );
+  return <FormDataContext.Provider value={formValue}>{children}</FormDataContext.Provider>;
 };
 
 export default FormDataProvider;
