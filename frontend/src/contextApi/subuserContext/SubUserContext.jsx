@@ -48,7 +48,10 @@ const SubUserProvider = ({ children }) => {
     try {
       // Make a GET request to the subusers API
       // Axios automatically handles sending cookies for same-origin requests
-      const response = await axios.get('http://localhost:8000/api/subusers/');
+      const response = await axios.get('http://localhost:8000/api/subusers/',
+        {
+          withCredentials: true,
+      });
 
       // Set the fetched data to the subUserListing state
       setSubUserListing(response.data);
