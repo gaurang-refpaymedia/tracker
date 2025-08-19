@@ -11,6 +11,7 @@ import string
 from passlib.context import CryptContext
 import logging
 from typing import Annotated
+import app.auth as auth
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -47,6 +48,7 @@ def set_user_otp(db: Session, email: str):
 
 # === Utility: Authenticate User/SubUser ===
 def authenticate_user(email: str, password: str, db: Session):
+    print(email)
     user = db.query(models.User).filter(models.User.email == email).first()
     if user and pwd_context.verify(password, user.password):
         return {
@@ -58,6 +60,14 @@ def authenticate_user(email: str, password: str, db: Session):
         }
 
     subuser = db.query(SubUser).filter(SubUser.email == email).first()
+    print("==========================================")
+    print("LOGIN TIME PASSWORD")
+    print(password)
+    print("LOGIN TIME HASH")
+    print(auth.get_password_hash(password))
+    print("LOGIN TIME DB PASSWORD")
+    print(subuser.password)
+    print("==========================================")
     if subuser and pwd_context.verify(password, subuser.password):
         return {
             "email": subuser.email,

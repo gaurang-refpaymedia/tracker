@@ -6,9 +6,9 @@ export const SubUserContext = createContext({});
 const SubUserProvider = ({ children }) => {
   const [subUser, setSubUser] = useState(null);
   const [subUserListing, setSubUserListing] = useState([]);
+  const [updateSubUserListing, setUpdateSubUserListing] = useState([]);
   const [listingLoading, setListingLoading] = useState(false);
   const [listingError, setListingError] = useState(null);
-
 
   // Updated function to not accept user_role_code and userCode from the client
   const createSubUser = async (name, email, roleCode, password) => {
@@ -48,29 +48,28 @@ const SubUserProvider = ({ children }) => {
     try {
       // Make a GET request to the subusers API
       // Axios automatically handles sending cookies for same-origin requests
-      const response = await axios.get('http://localhost:8000/api/subusers/',
-        {
-          withCredentials: true,
+      const response = await axios.get('http://localhost:8000/api/subusers/', {
+        withCredentials: true,
       });
 
       // Set the fetched data to the subUserListing state
       setSubUserListing(response.data);
-      console.log("Sub-user listing fetched successfully:", response.data);
+      console.log('Sub-user listing fetched successfully:', response.data);
     } catch (err) {
       // Handle errors during the fetch operation
       if (err.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx (e.g., 401, 403, 404, 500)
-        console.error("Failed to fetch sub-user listing:", err.response.data.detail || err.response.statusText);
-        setListingError(err.response.data.detail || "Failed to load sub-users. Please try again.");
+        console.error('Failed to fetch sub-user listing:', err.response.data.detail || err.response.statusText);
+        setListingError(err.response.data.detail || 'Failed to load sub-users. Please try again.');
       } else if (err.request) {
         // The request was made but no response was received (e.g., network error)
-        console.error("Network error fetching sub-user listing:", err.message);
-        setListingError("Network error. Please check your connection.");
+        console.error('Network error fetching sub-user listing:', err.message);
+        setListingError('Network error. Please check your connection.');
       } else {
         // Something happened in setting up the request that triggered an Error
-        console.error("Error setting up sub-user listing request:", err.message);
-        setListingError("An unexpected error occurred while fetching sub-users.");
+        console.error('Error setting up sub-user listing request:', err.message);
+        setListingError('An unexpected error occurred while fetching sub-users.');
       }
       setSubUserListing([]); // Clear listing on error
     } finally {
@@ -78,13 +77,76 @@ const SubUserProvider = ({ children }) => {
     }
   };
 
+  const getSubUser = async (subuserId) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/api/subusers/${subuserId}`, {
+        withCredentials: true,
+      });
+
+      setSubUser(response.data);
+
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching sub user', error);
+      throw error;
+    }
+  };
+
+  const updateSubUser = async (subuserId, updates) => {
+
+    console.log(updates);
+    try {
+      const response = await axios.put(`http://localhost:8000/api/subusers/${subuserId}`, updates, { withCredentials: true });
+
+      // setUpdateSubUserListing((prev) => prev.map((u) => (u.id === subuserId ? response.data : u)));
+
+      return response.data;
+    } catch (error) {
+      console.error('Error updating sub user:', error);
+      throw error;
+    }
+  };
+
+  const deactivateSubUser = async (subuserId) => {
+    try {
+      const response = await axios.patch(`http://localhost:8000/api/subusers/${subuserId}/deactivate`, {}, { withCredentials: true });
+      console.log('Sub user deactivated:', response.data);
+
+      setSubUserListing((prev) => prev.map((u) => (u.id === subuserId ? response.data : u)));
+
+      return response.data;
+    } catch (error) {
+      console.error('Error deactivating sub user:', error);
+      throw error;
+    }
+  };
+
+  const deleteSubUser = async (subuserId) => {
+    try {
+      const response = await axios.delete(`http://localhost:8000/api/subusers/${subuserId}`, { withCredentials: true });
+      console.log('Sub user deleted:', response.data);
+
+      // Remove from state
+      setSubUserListing((prev) => prev.filter((u) => u.id !== subuserId));
+
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting sub user:', error);
+      throw error;
+    }
+  };
+
   const subUserValue = {
     subUser,
     createSubUser,
-    subUserListing,   
+    subUserListing,
     listingLoading,
     listingError,
-    fetchSubUserListing
+    fetchSubUserListing,
+    getSubUser,
+    deleteSubUser,
+    deactivateSubUser,
+    updateSubUser,
   };
 
   return <SubUserContext.Provider value={subUserValue}>{children}</SubUserContext.Provider>;

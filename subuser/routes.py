@@ -169,7 +169,13 @@ def update_subuser(
 
     # Optional: hash password if it's being updated
     if updates.password:
-        updates.password = pwd_context.hash(updates.password)
+        print("==================================")
+        print("UPDATE TIME PASSWORD")
+        print(updates.password)
+        print("UPDATE TIME HASH")
+        print(auth.get_password_hash(updates.password))
+        print("==================================")
+        updates.password = auth.get_password_hash(updates.password)
 
     return crud.update_subuser(db, subuser_id, updates, current_identity)
 

@@ -7,21 +7,24 @@ import NavigationProvider from './contextApi/navigationContext';
 import SideBarToggleProvider from './contextApi/SidebarContext';
 import DataProvider from './contextApi/DataContext';
 import SubUserProvider from './contextApi/subuserContext/SubUserContext';
+import { AdvertiserProvider } from './contextApi/advertiserContext/AdvertiserContext';
 
 function App() {
   return (
     <>
-      <AuthProvider>
-        <SubUserProvider>
-          <DataProvider>
-            <NavigationProvider>
-              <SideBarToggleProvider>
-                <RouterProvider router={router} />
-              </SideBarToggleProvider>
-            </NavigationProvider>
-          </DataProvider>
-        </SubUserProvider>
-      </AuthProvider>
+      <AdvertiserProvider>
+        <AuthProvider>
+          <SubUserProvider>
+            <DataProvider>
+              <NavigationProvider>
+                <SideBarToggleProvider>
+                  <RouterProvider router={router} />
+                </SideBarToggleProvider>
+              </NavigationProvider>
+            </DataProvider>
+          </SubUserProvider>
+        </AuthProvider>
+      </AdvertiserProvider>
     </>
   );
 }

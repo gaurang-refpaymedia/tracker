@@ -4,6 +4,7 @@ import axios from 'axios'; // Import axios
 export const AuthContext = createContext({
   user: null,
   isLoggedIn: false,
+  loading: true,
   login: async (email, password) => {},
   register: async (company_name, company_code, super_user_name, super_user_email) => {},
   logout: () => {},
@@ -12,12 +13,15 @@ export const AuthContext = createContext({
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // <-- new state
   const [registerCompany, setRegisterCompany] = useState(null); // This state variable seems unused
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [forgotPasswordMessage, setForgotPasswordMessage] = useState('');
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem("token");
+
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -28,6 +32,7 @@ const AuthProvider = ({ children }) => {
         localStorage.removeItem('user');
       }
     }
+    setLoading(false); // <-- finish check
   }, []);
 
   const login = async (email, password) => {
@@ -315,6 +320,7 @@ const AuthProvider = ({ children }) => {
     user,
     registerCompany, // Still present, but unused state variable
     isLoggedIn,
+    loading,
     login,
     logout,
     register,

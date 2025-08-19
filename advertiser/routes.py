@@ -10,7 +10,7 @@ from app.models import User
 from subuser.models import SubUser
 from typing import Union
 
-router = APIRouter(prefix="/advertisers", tags=["Advertisers"])
+router = APIRouter(prefix="/api/advertisers", tags=["Advertisers"])
 
 get_db = database.get_db
 

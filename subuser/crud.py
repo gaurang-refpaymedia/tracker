@@ -68,9 +68,6 @@ def update_subuser(db: Session, subuser_id: int, updates: schemas.SubUserUpdate,
     if subuser.company_code != current_user.company_code:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    if updates.password:
-        updates.password = pwd_context.hash(updates.password)
-    
     # ✅ Prevent changing to SUPER_ADMIN role
     if updates.role_code == "SUPER_ADMIN":
         raise HTTPException(status_code=403, detail="Cannot assign SUPER_ADMIN role to sub-user")

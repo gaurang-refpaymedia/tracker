@@ -1,5 +1,3 @@
-# advertiser/models.py --
-
 from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
@@ -36,10 +34,10 @@ class Advertiser(Base):
     creator_user = relationship("User", primaryjoin="foreign(Advertiser.created_by) == User.user_code", viewonly=True)
     creator_subuser = relationship("SubUser", primaryjoin="foreign(Advertiser.created_by) == SubUser.user_code", viewonly=True)
 
-    email = Column(String(127), nullable=True)  # No longer globally unique
+    email = Column(String(127), nullable=True)
     contact_person = Column(String(255), nullable=True)
     contact_number = Column(String(15), nullable=True)
-    token = Column(String(255), unique=True, nullable=True)  # Still globally unique
+    token = Column(String(255), unique=True, nullable=True)
     currency = Column(String(127), index=True, nullable=True)
     address = Column(String(255), nullable=True)
     active_state = Column(Boolean, default=True)
