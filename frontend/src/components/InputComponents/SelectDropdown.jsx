@@ -23,6 +23,7 @@ const SelectDropdown = ({ options, selectedOption, onSelectOption, className, de
                 setIsOpen(false);
             }
         };
+        
         document.addEventListener('click', handleClickOutside);
 
         return () => {

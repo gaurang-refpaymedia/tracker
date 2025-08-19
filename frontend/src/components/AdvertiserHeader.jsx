@@ -3,7 +3,7 @@ import { FiArchive, FiBarChart, FiBell, FiBookOpen, FiBriefcase, FiCheck, FiEye,
 import { BsFiletypeCsv, BsFiletypeExe, BsFiletypePdf, BsFiletypeTsx, BsFiletypeXml, BsPrinter } from 'react-icons/bs';
 // import Dropdown from '@/components/shared/Dropdown';
 import { Link } from 'react-router-dom';
-import { Dropdown } from 'bootstrap';
+import Dropdown from './InputComponents/Dropdown';
 
 export const filterAction = [
     { label: "All", icon: <FiEye /> },
