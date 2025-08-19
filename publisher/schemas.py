@@ -1,16 +1,16 @@
-# advertiser/schemas.py --
+# publisher/schemas.py --
 
 
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 
 
-class AdvertiserBase(BaseModel):
+class PublisherBase(BaseModel):
     advcode: str
-    adv_country_id: int
-    adv_status_id: int
-    adv_state_id: int
-    adv_timezone_id: int
+    pub_country_id: int
+    pub_status_id: int
+    pub_state_id: int
+    pub_timezone_id: int
     email: EmailStr
     contact_person: Optional[str]
     contact_number: Optional[str]
@@ -20,23 +20,23 @@ class AdvertiserBase(BaseModel):
     active_state: Optional[bool] = True
 
 
-class AdvertiserCreate(BaseModel):
+class PublisherCreate(BaseModel):
     advcode: str
-    adv_country_id: int
-    adv_status_id: int
-    adv_state_id: int
-    adv_timezone_id: int
+    pub_country_id: int
+    pub_status_id: int
+    pub_state_id: int
+    pub_timezone_id: int
     token: Optional[str]
     email: EmailStr
 
 
 
-class AdvertiserUpdate(BaseModel):
+class PublisherUpdate(BaseModel):
     advcode: Optional[str]
-    adv_country_id: Optional[int]
-    adv_status_id: Optional[int]
-    adv_state_id: Optional[int]
-    adv_timezone_id: Optional[int]
+    pub_country_id: Optional[int]
+    pub_status_id: Optional[int]
+    pub_state_id: Optional[int]
+    pub_timezone_id: Optional[int]
     email: Optional[EmailStr]
     contact_person: Optional[str]
     contact_number: Optional[str]
@@ -46,7 +46,7 @@ class AdvertiserUpdate(BaseModel):
     active_state: Optional[bool]
 
 
-class AdvertiserResponse(AdvertiserBase):
+class PublisherResponse(PublisherBase):
     id: int
     company_code: str
     created_by: Optional[str]
@@ -55,7 +55,7 @@ class AdvertiserResponse(AdvertiserBase):
         orm_mode = True
 
 
-class Advertiser(AdvertiserBase):
+class Publisher(PublisherBase):
     id: int
 
     class Config:
