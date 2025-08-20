@@ -9,8 +9,8 @@ import ChangePassword from '../pages/ChangePassword';
 import ForgotPassword from '../pages/ForgotPassword';
 import { SubUser } from '../pages/SubUser';
 import AdvertiserList from '../pages/advertisers/AdvertiserList';
-import AdvertiserForm from '../pages/advertisers/AdvertiserForm';
 import AdvertiserDetail from '../pages/advertisers/AdvertiserDetail';
+import AdvertiserForm from '../pages/advertisers/AdvertiserForm';
 
 export const router = createBrowserRouter([
   {

@@ -3,6 +3,7 @@ import AdminHeader from "../components/AdminHeader";
 import AdminSidebar from "../components/AdminSidebar";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../contextApi/AuthContext";
+import PageHeader from "../components/PageHeader";
 
 const ApplicationLayout = () => {
   const { user } = useContext(AuthContext);
@@ -24,8 +25,12 @@ const ApplicationLayout = () => {
       <AdminSidebar />
       <main className="nxl-container">
         <div className="nxl-content">
+          <PageHeader></PageHeader>
           <div className="main-content">
-            <Outlet />
+            
+            <div className="p-2">
+              <Outlet />
+            </div>
           </div>
         </div>
       </main>

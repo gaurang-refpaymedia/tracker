@@ -9,7 +9,7 @@ class Advertiser(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    advcode = Column(String(10), index=True, nullable=True)
+    advcode = Column(String(100), index=True, nullable=True)
 
     adv_country_id = Column(Integer, ForeignKey("countries.id"), nullable=False)
     adv_country = relationship("Country")

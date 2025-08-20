@@ -6,7 +6,7 @@ from typing import Optional
 
 
 class AdvertiserBase(BaseModel):
-    advcode: Optional[str]
+    advcode: str
     adv_country_id: int
     adv_status_id: int
     adv_state_id: int
@@ -20,8 +20,16 @@ class AdvertiserBase(BaseModel):
     active_state: Optional[bool] = True
 
 
-class AdvertiserCreate(AdvertiserBase):
+class AdvertiserCreate(BaseModel):
+    advcode: str
+    adv_country_id: int
+    adv_status_id: int
+    adv_state_id: int
+    adv_timezone_id: int
+    token: Optional[str]
+    email: EmailStr
     pass
+
 
 
 class AdvertiserUpdate(BaseModel):

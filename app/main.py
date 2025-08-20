@@ -16,6 +16,7 @@ from subuser import routes as subuser_routes
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+
 app = FastAPI()
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, same_site="lax", https_only=False)

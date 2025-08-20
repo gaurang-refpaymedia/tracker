@@ -9,6 +9,7 @@ from app.models import Company, User
 
 
 def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company_code: str, created_by: str):
+    print("================******************************")
     existing = db.query(models.Advertiser).filter_by(email=advertiser.email, company_code=company_code).first()
     
     if existing:
@@ -20,7 +21,7 @@ def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company
             raise HTTPException(status_code=400, detail="Token already exists")
     
     # Exclude fields that are passed manually to avoid conflict
-    data = advertiser.dict(exclude={"company_code", "created_by"})
+    data = advertiser.model_dump(exclude={"company_code", "created_by"})
     
     db_adv = models.Advertiser(
         **data,

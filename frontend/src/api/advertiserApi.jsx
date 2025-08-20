@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:8000/api/advertisers", // your FastAPI backend
-  withCredentials: true, // important if session-based auth
+  baseURL: "http://localhost:8000/api/advertisers",
+  withCredentials: true,
 });
 
 export const fetchAdvertisers = () => API.get("/");
