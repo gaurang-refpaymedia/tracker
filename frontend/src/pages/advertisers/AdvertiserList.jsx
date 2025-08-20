@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdvertisers } from '../../contextApi/advertiserContext/AdvertiserContext';
 import PageHeader from '../../components/PageHeader';
+import AdvertiserHeader from '../../components/AdvertiserHeader';
 
 export default function AdvertiserList() {
   const { advertisers, loadAdvertisers, removeAdvertiser, loading, error } = useAdvertisers();
@@ -14,7 +15,9 @@ export default function AdvertiserList() {
 
   return (
     <>
-    {/* <PageHeader></PageHeader> */}
+    <PageHeader>
+      <AdvertiserHeader/>
+    </PageHeader>
       <div>
         <h2 className="text-xl font-bold mb-4">Advertisers</h2>
         <Link to="/advertisers/new" className="btn btn-primary">
