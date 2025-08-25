@@ -59,15 +59,18 @@ def get_advertisers(
     return crud.get_advertisers_for_company(db, current_identity.get("company_code", ""))
 
 
-@router.get("/{advertiser_id}", response_model=schemas.AdvertiserResponse)
-def get_advertiser_by_id(
+@router.get("/{advertiser_id}", response_model=schemas.AdvertiserOut)
+def read_advertiser(
     advertiser_id: int,
     db: Session = Depends(get_db),
-    current_identity = Depends(auth.get_current_user),
+    current_user = Depends(auth.get_current_user),
 ):
-    advertiser = crud.get_advertiser(db, advertiser_id, current_identity.get("company_code", ""))
+    company_code = current_user.get("company_code", "")   # 👈 fetch from session / token / current_user
+    advertiser = crud.get_advertiser(db, advertiser_id, company_code)
+
     if not advertiser:
         raise HTTPException(status_code=404, detail="Advertiser not found")
+
     return advertiser
 
 

@@ -6,7 +6,7 @@ from typing import Optional
 
 
 class PublisherBase(BaseModel):
-    advcode: str
+    pubcode: str
     pub_country_id: int
     pub_status_id: int
     pub_state_id: int
@@ -21,7 +21,7 @@ class PublisherBase(BaseModel):
 
 
 class PublisherCreate(BaseModel):
-    advcode: str
+    pubcode: str
     pub_country_id: int
     pub_status_id: int
     pub_state_id: int
@@ -32,7 +32,7 @@ class PublisherCreate(BaseModel):
 
 
 class PublisherUpdate(BaseModel):
-    advcode: Optional[str]
+    pubcode: Optional[str]
     pub_country_id: Optional[int]
     pub_status_id: Optional[int]
     pub_state_id: Optional[int]

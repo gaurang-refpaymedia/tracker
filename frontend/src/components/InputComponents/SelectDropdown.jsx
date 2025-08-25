@@ -14,7 +14,7 @@ const SelectDropdown = ({ options, selectedOption, onSelectOption, className, de
 
     useEffect(() => {
         if (defaultSelect) {
-            const defaultOption = options?.find(option => option.value?.toLowerCase() === defaultSelect?.toLowerCase());
+            const defaultOption = options?.find(option => String(option.value)?.toLowerCase() === String(defaultSelect)?.toLowerCase());
             setLocalSelectedOption(defaultOption || null); // Set default if found
         }
 
@@ -23,7 +23,6 @@ const SelectDropdown = ({ options, selectedOption, onSelectOption, className, de
                 setIsOpen(false);
             }
         };
-        
         document.addEventListener('click', handleClickOutside);
 
         return () => {
@@ -62,10 +61,12 @@ const SelectDropdown = ({ options, selectedOption, onSelectOption, className, de
         <div className={`select-dropdown ${className ? className : ""} ${openUpwards ? 'open-upwards' : ''}`} ref={dropdownRef}>
             <div className={"select-box"} onClick={toggleDropdown}>
                 <span className="selected-label">
-                    {localSelectedOption?.color ? <span className="status-dot" style={{ backgroundColor: localSelectedOption?.color }}></span> : ""}
+                    {/* {localSelectedOption?.color ? <span className="status-dot" style={{ backgroundColor: localSelectedOption?.color }}></span> : ""}
                     {localSelectedOption?.icon ? <span className={`lh-1 fs-16 ${localSelectedOption.iconClassName}`}>{getIcon(localSelectedOption?.icon)} </span> : ""}
                     {localSelectedOption?.img ? <img src={localSelectedOption.img} className="avatar-image avatar-sm" /> : ""}
-                    {localSelectedOption?.label}
+                    {localSelectedOption?.label} */}
+
+                    {selectedOption?.label}
                 </span>
                 <span className="arrow">{isOpen ? <FiChevronUp /> : <FiChevronDown />}</span>
             </div>

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAdvertisers } from '../../contextApi/advertiserContext/AdvertiserContext';
+import { usePublishers } from '../../contextApi/publisherContext/PublisherContext';
 
 import { useEffect, useState } from 'react';
 
@@ -20,29 +20,29 @@ const propsalDiscountOptions = [
   { value: 'after-tax', label: 'After Tax' },
 ];
 
-export default function AdvertiserForm() {
+export default function PublisherForm() {
   const { id } = useParams();
 
   const [selectedOption, setSelectedOption] = useState(null);
 
   const isEdit = Boolean(id);
 
-  const { addAdvertiser, editAdvertiser, loadAdvertiser, advertiser, error } = useAdvertisers();
+  const { addPublisher, editPublisher, loadPublisher, publisher, error } = usePublishers();
 
   const { countries, countriesItems, states, statesItems, statuses, statusesItems, timezones, timezonesItems, loadingCountries, loadingStates, loadingStatuses, loadingTimezones, countryError, stateError, statusError, timezoneError } = useContext(DataContext);
 
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    advcode: '',
+    pubcode: '',
 
-    adv_country_id: '',
+    pub_country_id: '',
 
-    adv_status_id: '',
+    pub_status_id: '',
 
-    adv_state_id: '',
+    pub_state_id: '',
 
-    adv_timezone_id: '',
+    pub_timezone_id: '',
 
     token: '',
 
@@ -63,15 +63,15 @@ export default function AdvertiserForm() {
 
   useEffect(() => {
     if (isEdit) {
-      loadAdvertiser(id);
+      loadPublisher(id);
     }
   }, [id]);
 
   useEffect(() => {
-    if (advertiser && isEdit) {
-      setFormData(advertiser);
+    if (publisher && isEdit) {
+      setFormData(publisher);
     }
-  }, [advertiser]);
+  }, [publisher]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,13 +91,13 @@ export default function AdvertiserForm() {
     let result;
 
     if (isEdit) {
-      result = editAdvertiser(id, formData);
+      result = editPublisher(id, formData);
     } else {
-      result = addAdvertiser(formData);
+      result = addPublisher(formData);
     }
 
     if (result && !error) {
-      navigate('/advertisers');
+      navigate('/publishers');
     }
   };
 
@@ -108,7 +108,7 @@ export default function AdvertiserForm() {
           <div className="card-body lead-status">
             <div className="mb-3 d-flex align-items-center justify-content-between">
               <h5 className="fw-bold mb-0 me-4">
-                <span className="d-block mb-2">{isEdit ? 'Update Advertiser' : 'Create Advertiser'} :</span>
+                <span className="d-block mb-2">{isEdit ? 'Update Publisher' : 'Create Publisher'} :</span>
 
                 <span className="fs-12 fw-normal text-muted text-truncate-1-line">Typically refers to adding a new potential customer or sales prospect</span>
               </h5>
@@ -135,9 +135,9 @@ export default function AdvertiserForm() {
             <form onSubmit={handleSubmit}>
               <div className="row">
                 <div className="col-lg-4 mb-4">
-                  <label className="form-label">Advertiser Code</label>
+                  <label className="form-label">Publisher Code</label>
 
-                  <Input label={'Advertiser Code'} onChange={handleChange} labelId={'advcode'} placeholder={'Advertiser Code'} name={'advcode'} value={formData.advcode} />
+                  <Input label={'Publisher Code'} onChange={handleChange} labelId={'pubcode'} placeholder={'Publisher Code'} name={'pubcode'} value={formData.pubcode} />
                 </div>
 
                 <div className="col-lg-4 mb-4">
@@ -157,13 +157,13 @@ export default function AdvertiserForm() {
 
                   <SelectDropdown
                     options={countries.map((c) => ({ value: c.id, label: c.name }))}
-                    selectedOption={countries.find((c) => c.id === formData.adv_country_id) ? { value: formData.adv_country_id, label: countries.find((c) => c.id === formData.adv_country_id).name } : null}
+                    selectedOption={countries.find((c) => c.id === formData.pub_country_id) ? { value: formData.pub_country_id, label: countries.find((c) => c.id === formData.pub_country_id).name } : null}
                     defaultSelect="Select Country"
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
 
-                        adv_country_id: option.value,
+                        pub_country_id: option.value,
                       }))
                     }
                   />
@@ -174,13 +174,13 @@ export default function AdvertiserForm() {
 
                   <SelectDropdown
                     options={states.map((c) => ({ value: c.id, label: c.name }))}
-                    selectedOption={states.find((c) => c.id === formData.adv_state_id) ? { value: formData.adv_state_id, label: states.find((c) => c.id === formData.adv_state_id).name } : null}
+                    selectedOption={states.find((c) => c.id === formData.pub_state_id) ? { value: formData.pub_state_id, label: states.find((c) => c.id === formData.pub_state_id).name } : null}
                     defaultSelect="Select State"
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
 
-                        adv_state_id: option.value,
+                        pub_state_id: option.value,
                       }))
                     }
                   />
@@ -191,13 +191,13 @@ export default function AdvertiserForm() {
 
                   <SelectDropdown
                     options={statuses.map((c) => ({ value: c.id, label: c.label }))}
-                    selectedOption={statuses.find((c) => c.id === formData.adv_status_id) ? { value: formData.adv_status_id, label: statuses.find((c) => c.id === formData.adv_status_id).label } : null}
+                    selectedOption={statuses.find((c) => c.id === formData.pub_status_id) ? { value: formData.pub_status_id, label: statuses.find((c) => c.id === formData.pub_status_id).label } : null}
                     defaultSelect="Select Status"
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
 
-                        adv_status_id: option.value,
+                        pub_status_id: option.value,
                       }))
                     }
                   />
@@ -208,13 +208,13 @@ export default function AdvertiserForm() {
 
                   <SelectDropdown
                     options={timezones.map((c) => ({ value: c.id, label: c.code }))}
-                    selectedOption={timezones.find((c) => c.id === formData.adv_timezone_id) ? { value: formData.adv_timezone_id, label: timezones.find((c) => c.id === formData.adv_timezone_id).code } : null}
+                    selectedOption={timezones.find((c) => c.id === formData.pub_timezone_id) ? { value: formData.pub_timezone_id, label: timezones.find((c) => c.id === formData.pub_timezone_id).code } : null}
                     defaultSelect="Select timezones"
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
 
-                        adv_timezone_id: option.value,
+                        pub_timezone_id: option.value,
                       }))
                     }
                   />

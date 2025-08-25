@@ -7,24 +7,30 @@ import NavigationProvider from './contextApi/navigationContext';
 import SideBarToggleProvider from './contextApi/SidebarContext';
 import DataProvider from './contextApi/DataContext';
 import SubUserProvider from './contextApi/subuserContext/SubUserContext';
+import { PublisherProvider } from './contextApi/publisherContext/PublisherContext';
 import { AdvertiserProvider } from './contextApi/advertiserContext/AdvertiserContext';
+import { FilterProvider } from './contextApi/FilterContext';
 
 function App() {
   return (
     <>
-      <AdvertiserProvider>
-        <AuthProvider>
-          <SubUserProvider>
-            <DataProvider>
-              <NavigationProvider>
-                <SideBarToggleProvider>
-                  <RouterProvider router={router} />
-                </SideBarToggleProvider>
-              </NavigationProvider>
-            </DataProvider>
-          </SubUserProvider>
-        </AuthProvider>
-      </AdvertiserProvider>
+      <FilterProvider>
+        <AdvertiserProvider>
+          <PublisherProvider>
+            <AuthProvider>
+              <SubUserProvider>
+                <DataProvider>
+                  <NavigationProvider>
+                    <SideBarToggleProvider>
+                      <RouterProvider router={router} />
+                    </SideBarToggleProvider>
+                  </NavigationProvider>
+                </DataProvider>
+              </SubUserProvider>
+            </AuthProvider>
+          </PublisherProvider>
+        </AdvertiserProvider>
+      </FilterProvider>
     </>
   );
 }

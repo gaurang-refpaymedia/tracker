@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
-from app.models import Company, User
+from sqlalchemy.orm import joinedload
+
 
 
 def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company_code: str, created_by: str):
@@ -45,8 +46,23 @@ def get_advertisers_for_company(db: Session, company_code: str):
     return db.query(models.Advertiser).filter_by(company_code=company_code).all()
 
 
+
 def get_advertiser(db: Session, advertiser_id: int, company_code: str):
-    return db.query(models.Advertiser).filter_by(id=advertiser_id, company_code=company_code).first()
+    return (
+        db.query(models.Advertiser)
+        .options(
+            joinedload(models.Advertiser.adv_country),
+            joinedload(models.Advertiser.adv_state),
+            joinedload(models.Advertiser.adv_status),
+            joinedload(models.Advertiser.adv_timezone),
+            joinedload(models.Advertiser.company),
+            joinedload(models.Advertiser.role),
+            joinedload(models.Advertiser.creator_user),
+            joinedload(models.Advertiser.creator_subuser),
+        )
+        .filter_by(id=advertiser_id, company_code=company_code)
+        .first()
+    )
 
 
 def update_advertiser(db: Session, advertiser_id: int, updated_data: schemas.AdvertiserUpdate, company_code: str):

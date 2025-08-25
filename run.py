@@ -9,7 +9,7 @@ if __name__ == "__main__":
 ALEMBIC DATABASE MIGRATION COMMANDS - 
 
 
-alembic revision --autogenerate -m "initial migration"
+alembic revision --autogenerate -m "change in the advertiser module"
 alembic upgrade head
 
 

@@ -84,13 +84,12 @@ const Menus = () => {
                                                 {subdropdownMenu.map(({ id, name, path }) => {
                                                     return (
                                                         <ul
-                                                            key={id}
                                                             className={`nxl-submenu ${openSubDropdown === x
                                                                 ? "nxl-menu-visible"
                                                                 : "nxl-menu-hidden "
                                                                 }`}
                                                         >
-                                                            <li
+                                                            <li key={id}
                                                                 className={`nxl-item ${pathName === path ? "active" : ""
                                                                     }`}
                                                             >
@@ -111,7 +110,7 @@ const Menus = () => {
                                                     {name}
                                                 </Link>
                                             </li>
-                                        )}
+                                        )}  
                                     </Fragment>
                                 );
                             })}

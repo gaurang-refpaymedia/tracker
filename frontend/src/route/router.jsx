@@ -12,6 +12,10 @@ import AdvertiserList from '../pages/advertisers/AdvertiserList';
 import AdvertiserDetail from '../pages/advertisers/AdvertiserDetail';
 import AdvertiserForm from '../pages/advertisers/AdvertiserForm';
 
+import PublisherList from '../pages/publishers/PublisherList';
+import PublisherDetail from '../pages/publishers/PublisherDetail';
+import PublisherForm from '../pages/publishers/PublisherForm';
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -48,6 +52,22 @@ export const router = createBrowserRouter([
       {
         path: '/advertisers/:id/edit',
         element: <AdvertiserForm />,
+      },
+      {
+        path: '/publishers',
+        element: <PublisherList />,
+      },
+      {
+        path: '/publishers/new',
+        element: <PublisherForm />,
+      },
+      {
+        path: '/publishers/:id',
+        element: <PublisherDetail />,
+      },
+      {
+        path: '/publishers/:id/edit',
+        element: <PublisherForm />,
       },
     ],
   },

@@ -9,7 +9,7 @@ class Publisher(Base):
     )
 
     id = Column(Integer, primary_key=True, index=True)
-    advcode = Column(String(100), index=True, nullable=True)
+    pubcode = Column(String(25), index=True, nullable=True)
 
     pub_country_id = Column(Integer, ForeignKey("countries.id"), nullable=False)
     pub_country = relationship("Country")

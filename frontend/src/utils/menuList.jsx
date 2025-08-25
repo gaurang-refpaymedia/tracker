@@ -39,4 +39,24 @@ export const menuList = [
       }
     ],
   },
+  {
+    id: 1,
+    name: 'Publishers',
+    path: '#',
+    icon: 'feather-cast',
+    dropdownMenu: [
+      {
+        id: 1,
+        name: 'Publisher List',
+        path: '/publishers',
+        subdropdownMenu: false,
+      },
+      {
+        id: 2,
+        name: 'Create Publisher',
+        path: '/publishers/new',
+        subdropdownMenu: false,
+      }
+    ],
+  },
 ];

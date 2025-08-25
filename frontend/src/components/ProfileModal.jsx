@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 
 const ProfileModal = ({user}) => {
     const {logout} = useContext(AuthContext);
-    console.log("user info",user);
     return (
         <div className="dropdown nxl-h-item">
             <a href="#" data-bs-toggle="dropdown" role="button" data-bs-auto-close="outside">

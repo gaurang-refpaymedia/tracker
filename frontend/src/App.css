@@ -1,3 +1,8 @@
 .nxl-header .header-wrapper .nxl-h-dropdown.nxl-user-dropdown {
     width: 25rem !important;
 }
+
+.nxl-container .nxl-content .main-content {
+    overflow-x: hidden;
+    padding: 0.8rem !important;
+}

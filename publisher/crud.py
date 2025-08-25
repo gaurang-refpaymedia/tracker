@@ -9,7 +9,7 @@ from app.models import Company, User
 
 
 def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_code: str, created_by: str):
-    print("================******************************")
+    print("================***create publisher***************************")
     existing = db.query(models.Publisher).filter_by(email=publisher.email, company_code=company_code).first()
     
     if existing:
@@ -23,21 +23,21 @@ def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_co
     # Exclude fields that are passed manually to avoid conflict
     data = publisher.model_dump(exclude={"company_code", "created_by"})
     
-    db_adv = models.Publisher(
+    db_pub = models.Publisher(
         **data,
         company_code=company_code,
         created_by=created_by,
     )
 
-    db.add(db_adv)
+    db.add(db_pub)
     try:
         db.commit()
-        db.refresh(db_adv)
+        db.refresh(db_pub)
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=400, detail="Failed to create publisher due to a uniqueness conflict")
     
-    return db_adv
+    return db_pub
 
 
 
