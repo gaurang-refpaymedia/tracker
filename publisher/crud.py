@@ -6,6 +6,7 @@ from . import models, schemas
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from app.models import Company, User
+from sqlalchemy.orm import joinedload
 
 
 def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_code: str, created_by: str):
@@ -46,7 +47,21 @@ def get_publishers_for_company(db: Session, company_code: str):
 
 
 def get_publisher(db: Session, publisher_id: int, company_code: str):
-    return db.query(models.Publisher).filter_by(id=publisher_id, company_code=company_code).first()
+    return (
+        db.query(models.Publisher)
+        .options(
+            joinedload(models.Publisher.pub_country),
+            joinedload(models.Publisher.pub_state),
+            joinedload(models.Publisher.pub_status),
+            joinedload(models.Publisher.pub_timezone),
+            joinedload(models.Publisher.company),
+            joinedload(models.Publisher.role),
+            joinedload(models.Publisher.creator_user),
+            joinedload(models.Publisher.creator_subuser),
+        )
+        .filter_by(id=publisher_id, company_code=company_code)
+        .first()
+    )
 
 
 def update_publisher(db: Session, publisher_id: int, updated_data: schemas.PublisherUpdate, company_code: str):
