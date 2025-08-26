@@ -60,7 +60,6 @@ def get_subusers(
     db: Session = Depends(get_db),
     current_identity=Depends(get_current_identity),
 ):
-    print(current_identity)
     return crud.get_all_subusers_for_company(db, current_identity.company_code)
 
 
@@ -169,12 +168,6 @@ def update_subuser(
 
     # Optional: hash password if it's being updated
     if updates.password:
-        print("==================================")
-        print("UPDATE TIME PASSWORD")
-        print(updates.password)
-        print("UPDATE TIME HASH")
-        print(auth.get_password_hash(updates.password))
-        print("==================================")
         updates.password = auth.get_password_hash(updates.password)
 
     return crud.update_subuser(db, subuser_id, updates, current_identity)

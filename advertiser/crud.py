@@ -10,7 +10,6 @@ from sqlalchemy.orm import joinedload
 
 
 def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company_code: str, created_by: str):
-    print("================******************************")
     existing = db.query(models.Advertiser).filter_by(email=advertiser.email, company_code=company_code).first()
     
     if existing:

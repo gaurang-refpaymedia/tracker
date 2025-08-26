@@ -220,7 +220,6 @@ const RegisterForm = ({ path }) => {
             </div>
           )}
         </div>
-        {/* --- End Subscription Radio Buttons --- */}
 
         <div className="mb-4">
           <input

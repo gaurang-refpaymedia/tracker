@@ -41,7 +41,6 @@ def create_publisher(
     db: Session = Depends(get_db),
     current_identity = Depends(auth.get_current_user),
 ):
-    print("*****************")
     return crud.create_publisher(
         db=db,
         publisher=publisher,
@@ -55,7 +54,6 @@ def get_publishers(
     db: Session = Depends(get_db),
     current_identity = Depends(auth.get_current_user),
 ):
-    print("*********get publisher********")
     return crud.get_publishers_for_company(db, current_identity.get("company_code", ""))
 
 

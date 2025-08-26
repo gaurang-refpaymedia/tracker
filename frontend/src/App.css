@@ -6,3 +6,7 @@
     overflow-x: hidden;
     padding: 0.8rem !important;
 }
+
+.dataTables_wrapper .row:first-child, .dataTables_wrapper .row:last-child {
+    padding: 19px 0px 8px 10px !important;
+}

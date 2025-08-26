@@ -10,7 +10,6 @@ from sqlalchemy.orm import joinedload
 
 
 def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_code: str, created_by: str):
-    print("================***create publisher***************************")
     existing = db.query(models.Publisher).filter_by(email=publisher.email, company_code=company_code).first()
     
     if existing:

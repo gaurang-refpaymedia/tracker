@@ -1,10 +1,9 @@
 import React, { memo, useEffect, useState } from 'react';
-import { FiAlertOctagon, FiArchive, FiClock, FiEdit3, FiEdit, FiEye, FiMoreHorizontal, FiPrinter, FiTrash, FiTrash2 } from 'react-icons/fi';
+import { FiArchive, FiEdit, FiEye, FiTrash } from 'react-icons/fi';
 import Table from './Table';
-import SelectDropdown from './InputComponents/SelectDropdown';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAdvertisers } from '../contextApi/advertiserContext/AdvertiserContext';
-import { FiBarChart, FiBell, FiBookOpen, FiBriefcase, FiCheck, FiFilter, FiPaperclip, FiPlus, FiSend, FiShield, FiUser, FiWifiOff } from 'react-icons/fi'
+import { FiBarChart, FiBell, FiBookOpen, FiBriefcase, FiCheck, FiFilter, FiPaperclip, FiPlus, FiSend, FiShield, FiUser, FiWifiOff } from 'react-icons/fi';
 import { useFilter } from '../contextApi/FilterContext';
 
 const statusColors = {
@@ -14,16 +13,6 @@ const statusColors = {
   4: { label: 'Suspended', className: 'badge bg-info' },
   5: { label: 'Deleted', className: 'badge bg-secondary' },
 };
-
-const actions = [{ label: 'Edit', icon: <FiEdit3 /> }, { label: 'Print', icon: <FiPrinter /> }, { label: 'Remind', icon: <FiClock /> }, { type: 'divider' }, { label: 'Archive', icon: <FiArchive /> }, { label: 'Report Spam', icon: <FiAlertOctagon /> }, { type: 'divider' }, { label: 'Delete', icon: <FiTrash2 /> }];
-
-const TableCell = memo(({ options, defaultSelect }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
-
-  const navigate = useNavigate();
-
-  return <SelectDropdown options={options} defaultSelect={defaultSelect} selectedOption={selectedOption} onSelectOption={(option) => setSelectedOption(option)} />;
-});
 
 export const tableColumnFilter = [
   { label: 'All', icon: <FiEye /> },
@@ -41,7 +30,9 @@ export const tableColumnFilter = [
 const AdvertiserTable = ({ advertisers }) => {
   const { removeAdvertiser } = useAdvertisers();
 
-  const {selectedFilters} = useFilter();
+  const { selectedFilters } = useFilter();
+
+  // setSelectedFilters(intialColumns);
 
   const allColumns = [
     {
@@ -58,9 +49,7 @@ const AdvertiserTable = ({ advertisers }) => {
         return <input type="checkbox" className="custom-table-checkbox" ref={checkboxRef} checked={table.getIsAllRowsSelected()} onChange={table.getToggleAllRowsSelectedHandler()} />;
       },
       cell: ({ row }) => <input type="checkbox" className="custom-table-checkbox" checked={row.getIsSelected()} disabled={!row.getCanSelect()} onChange={row.getToggleSelectedHandler()} />,
-      meta: {
-        headerClassName: 'width-30',
-      },
+      meta: { headerClassName: 'width-30' },
     },
     {
       accessorKey: 'advcode',
@@ -69,9 +58,10 @@ const AdvertiserTable = ({ advertisers }) => {
       label: 'Advertiser Code',
     },
     {
-      accessorKey: 'company_code',
-      header: () => 'Company Code',
-      label: 'Company Code',
+      accessorKey: 'company',
+      header: () => 'Company',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'Company Name',
     },
     {
       accessorKey: 'email',
@@ -79,41 +69,43 @@ const AdvertiserTable = ({ advertisers }) => {
       cell: (info) => <Link to={`mailto:${info.getValue()}`}>{info.getValue()}</Link>,
     },
     {
-      accessorKey: 'adv_status_id',
+      accessorKey: 'adv_status',
       header: () => 'Status',
       cell: (info) => {
-        const id = info.getValue(); // e.g. 1,2,3...
-        const status = statusColors[id] || { label: 'Unknown', className: 'badge bg-light text-dark' };
-
+        const statusObj = info.getValue(); // {id:1,label:"Active"}
+        const status = statusColors[statusObj?.id] || { label: statusObj?.label || 'Unknown', className: 'badge bg-light text-dark' };
         return <span className={status.className}>{status.label}</span>;
       },
-      meta: {
-        className: 'fw-bold text-dark',
-      },
+      meta: { className: 'fw-bold text-dark' },
     },
     {
-      accessorKey: 'adv_country_id',
-      header: () => 'Country ID',
-      label: 'Country ID',
+      accessorKey: 'adv_country',
+      header: () => 'Country',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'Country',
     },
     {
-      accessorKey: 'adv_state_id',
-      header: () => 'State ID',
-      label: 'State ID',
+      accessorKey: 'adv_state',
+      header: () => 'State',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'State',
     },
     {
-      accessorKey: 'adv_timezone_id',
-      header: () => 'Timezone ID',
-      label: 'Timezone ID',
+      accessorKey: 'adv_timezone',
+      header: () => 'Timezone',
+      cell: (info) => info.getValue()?.code || '',
+      label: 'Timezone',
     },
     {
-      accessorKey: 'role_code',
-      header: () => 'Role Code',
+      accessorKey: 'role',
+      header: () => 'Role',
+      cell: (info) => info.getValue()?.code || '',
       label: 'Role Code',
     },
     {
-      accessorKey: 'created_by',
+      accessorKey: 'creator_user',
       header: () => 'Created By',
+      cell: (info) => info.getValue()?.name || '',
       label: 'Created By',
     },
     {
@@ -150,7 +142,6 @@ const AdvertiserTable = ({ advertisers }) => {
       header: () => 'Address',
       label: 'Address',
     },
-
     {
       accessorKey: 'actions',
       header: () => 'Actions',
@@ -170,20 +161,17 @@ const AdvertiserTable = ({ advertisers }) => {
           </div>
         );
       },
-
-      meta: {
-        headerClassName: 'text-end',
-      },
+      meta: { headerClassName: 'text-end' },
     },
   ];
 
-  const filterColumns = allColumns.filter(col => {
-    if(col.accessorKey === 'id' || col.accessorKey === 'actions'){
+  const filterColumns = allColumns.filter((col) => {
+    if (col.accessorKey === 'id' || col.accessorKey === 'actions') {
       return true;
     }
 
     return selectedFilters.includes(col.accessorKey);
-  })
+  });
   return (
     <>
       <Table data={advertisers} columns={filterColumns} />

@@ -24,9 +24,6 @@ async def get_current_user(
     request: Request,
     db: Session = Depends(get_db)
 ) -> Dict:
-    print("---------------------------------")
-    print(request.session)
-    print("---------------------------------")
     """
     Retrieves the current authenticated user's session data.
     Raises HTTPException if user data is not found in session or user no longer exists.
@@ -47,7 +44,6 @@ async def get_current_user(
     if not user:
         raise HTTPException(status_code=401, detail="User session invalid. Please log in again.")
     
-    print(user_data)
     return user_data
 
 

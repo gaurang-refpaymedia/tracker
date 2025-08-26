@@ -48,7 +48,6 @@ def set_user_otp(db: Session, email: str):
 
 # === Utility: Authenticate User/SubUser ===
 def authenticate_user(email: str, password: str, db: Session):
-    print(email)
     user = db.query(models.User).filter(models.User.email == email).first()
     if user and pwd_context.verify(password, user.password):
         return {
@@ -60,14 +59,6 @@ def authenticate_user(email: str, password: str, db: Session):
         }
 
     subuser = db.query(SubUser).filter(SubUser.email == email).first()
-    print("==========================================")
-    print("LOGIN TIME PASSWORD")
-    print(password)
-    print("LOGIN TIME HASH")
-    print(auth.get_password_hash(password))
-    print("LOGIN TIME DB PASSWORD")
-    print(subuser.password)
-    print("==========================================")
     if subuser and pwd_context.verify(password, subuser.password):
         return {
             "email": subuser.email,
@@ -96,25 +87,6 @@ def authenticate_user(email: str, password: str, db: Session):
 @router.get("/api/")
 def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
-
-# # === Route: Login ===
-# @router.post("/api/login")
-# def login(
-#     request: Request,
-#     db: Session = Depends(get_db),
-#     email: str = Form(...),
-#     password: str = Form(...),
-# ):
-#     try:
-#         user_data = authenticate_user(email, password, db)
-#         if not user_data:
-#             return JSONResponse(content={"error": "Invalid Email or Password"}, status_code=401)
-#         return create_user_session(request, user_data)
-#     except Exception as e:
-#         print(f"Error in /login: {e}")
-#         return JSONResponse(content={"error": f"Internal server error: {e}"}, status_code=500)
-
-
 
 @router.post("/api/login")
 def login(
@@ -195,7 +167,6 @@ async def logout(request: Request):
             del request.session["user"]
         return JSONResponse(content={"message": "Successfully logged out"})
     except Exception as e:
-        print(f"Error in /logout: {e}")
         return JSONResponse(content={"error": f"Internal server error: {e}"}, status_code=500)
 
 # === Route: Forgot Password (OTP Generation) ===

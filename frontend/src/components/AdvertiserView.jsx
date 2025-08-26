@@ -8,9 +8,13 @@ const AdvertiserView = ({ advertiser }) => {
     { title: 'Company Code', content: advertiser.company.name },
     { title: 'Token', content: advertiser.token },
     { title: 'Status', content: advertiser.adv_status.label || 'Unknown' },
-    { title: 'Country ID', content: advertiser.adv_country.name },
-    { title: 'State ID', content: advertiser.adv_state.name },
-    { title: 'Timezone ID', content: advertiser.adv_timezone.code },
+    { title: 'Country', content: advertiser.adv_country.name },
+    { title: 'State', content: advertiser.adv_state.name },
+    { title: 'Timezone', content: advertiser.adv_timezone.code },
+    { title: 'Contact Person', content: advertiser.contact_person },
+    { title: 'Contact Number', content: advertiser.contact_number },
+    { title: 'Currency', content: advertiser.currency },
+    { title: 'Address', content: advertiser.address },
     { title: 'Active State', content: advertiser.active_state ? 'Yes' : 'No' },
   ];
 

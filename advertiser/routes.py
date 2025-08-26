@@ -41,7 +41,6 @@ def create_advertiser(
     db: Session = Depends(get_db),
     current_identity = Depends(auth.get_current_user),
 ):
-    print("*****************")
     return crud.create_advertiser(
         db=db,
         advertiser=advertiser,
@@ -55,7 +54,6 @@ def get_advertisers(
     db: Session = Depends(get_db),
     current_identity = Depends(auth.get_current_user),
 ):
-    print("*********get advertiser********")
     return crud.get_advertisers_for_company(db, current_identity.get("company_code", ""))
 
 

@@ -46,8 +46,6 @@ async def change_password(
     old password, and new password.
     """
     try:
-        print("🔐 Incoming password change request:", request_data.dict())
-        # print("🧑 Session data received:", current_user_session_data) # Removed as per new requirement
 
         # Get user_identifier directly from the request_data
         user_identifier = request_data.user_code
@@ -72,8 +70,6 @@ async def change_password(
         db.add(user_in_db)
         db.commit()
         db.refresh(user_in_db)
-
-        print("✅ Password successfully changed for user:", user_identifier)
 
         return JSONResponse(
             content={"message": "Password changed successfully."},

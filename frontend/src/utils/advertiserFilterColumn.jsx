@@ -22,11 +22,11 @@ export const advertiserFilterColumn = [
   { label: 'All Filters', value: 'All', icon: <FiEye /> },
   { label: 'Advertiser ID', value: 'id', icon: <FiTag /> },
   { label: 'Advertiser Code', value: 'advcode', icon: <FiHash /> },
-  { label: 'Country', value: 'adv_country_id', icon: <FiGlobe /> },
-  { label: 'Status', value: 'adv_status_id', icon: <FiAlertCircle /> },
-  { label: 'State', value: 'adv_state_id', icon: <FiMap /> },
-  { label: 'Timezone', value: 'adv_timezone_id', icon: <FiClock /> },
-  { label: 'Company Code', value: 'company_code' },
+  { label: 'Country', value: 'adv_country', icon: <FiGlobe /> },
+  { label: 'Status', value: 'adv_status', icon: <FiAlertCircle /> },
+  { label: 'State', value: 'adv_state', icon: <FiMap /> },
+  { label: 'Timezone', value: 'adv_timezone', icon: <FiClock /> },
+  { label: 'Company Code', value: 'company', icon: <FiGlobe /> },
   { label: 'Role Code', value: 'role_code', icon: <FiUserCheck /> },
   { label: 'Created By', value: 'created_by', icon: <FiUserPlus /> },
   { label: 'Email', value: 'email', icon: <FiMail /> },
@@ -38,3 +38,5 @@ export const advertiserFilterColumn = [
   { label: 'Active', value: 'Active', icon: <FiCheckCircle /> },
   { label: 'Inactive', value: 'Inactive', icon: <FiMinusCircle /> },
 ];
+
+// export default initialAdvertiserColumn [('id', 'advcode', 'adv_country', 'adv_company', 'email', 'adv_status')];
