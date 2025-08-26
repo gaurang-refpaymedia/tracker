@@ -83,10 +83,16 @@ class AdvertiserCreate(BaseModel):
     adv_timezone_id: int
     token: Optional[str]
     email: EmailStr
+    contact_person: Optional[str]
+    contact_number: Optional[str]
+    currency: Optional[str] = None
+    address: Optional[str] = None
+    active_state: Optional[bool] = None
+    
 
 
 
-class AdvertiserUpdate(AdvertiserBase):
+class AdvertiserUpdate(BaseModel):
     advcode: Optional[str]
     adv_country_id: Optional[int]
     adv_status_id: Optional[int]

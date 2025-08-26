@@ -82,10 +82,14 @@ class PublisherCreate(BaseModel):
     pub_timezone_id: int
     token: Optional[str]
     email: EmailStr
+    contact_person: Optional[str]
+    contact_number: Optional[str]
+    currency: Optional[str]
+    address: Optional[str]
+    active_state: Optional[bool]
 
 
-
-class PublisherUpdate(PublisherBase):
+class PublisherUpdate(BaseModel):
     pubcode: Optional[str]
     pub_country_id: Optional[int]
     pub_status_id: Optional[int]

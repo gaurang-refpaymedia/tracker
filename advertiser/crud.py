@@ -73,8 +73,9 @@ def update_advertiser(db: Session, advertiser_id: int, updated_data: schemas.Adv
     if advertiser.company_code != company_code:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    for field, value in updated_data.dict(exclude_unset=True).items():
-        setattr(advertiser, field, value)
+    for field, value in updated_data.model_dump(exclude_unset=True).items():
+        if hasattr(advertiser, field):
+            setattr(advertiser, field, value)
 
     try:
         db.commit()

@@ -72,8 +72,9 @@ def update_publisher(db: Session, publisher_id: int, updated_data: schemas.Publi
     if publisher.company_code != company_code:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    for field, value in updated_data.dict(exclude_unset=True).items():
-        setattr(publisher, field, value)
+    for field, value in updated_data.model_dump(exclude_unset=True).items():
+        if hasattr(publisher, field):
+            setattr(publisher, field, value)
 
     try:
         db.commit()
