@@ -1,4 +1,4 @@
-import { createContext, useReducer, useContext, useEffect,useState } from 'react';
+import { createContext, useContext,useState } from 'react';
 import { fetchPublishers, fetchPublisher, createPublisher, updatePublisher, deletePublisher } from '../../api/publisherApi';
 
 const PublisherContext = createContext();
@@ -57,7 +57,7 @@ export const PublisherProvider = ({ children }) => {
     try {
       const res = await updatePublisher(id, data);
       setPublishers((prev) =>
-        prev.map((adv) => (adv.id === id ? res.data : adv))
+        prev.map((pub) => (pub.id === id ? res.data : pub))
       );
       setError(null);
     } catch (err) {
@@ -72,7 +72,7 @@ export const PublisherProvider = ({ children }) => {
     setLoading(true);
     try {
       await deletePublisher(id);
-      setPublishers((prev) => prev.filter((adv) => adv.id !== id));
+      setPublishers((prev) => prev.filter((pub) => pub.id !== id));
       setError(null);
     } catch (err) {
       setError(err.response?.data || err.message);

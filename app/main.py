@@ -25,7 +25,9 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, same_site="lax", ht
 # Add CORS middleware to allow cross-origin requests
 origins = [
     "http://localhost:5173",
+    "http://localhost:5174",
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
 ]
 
 

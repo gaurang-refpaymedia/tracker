@@ -1,10 +1,9 @@
-import React, { memo, useEffect, useState } from 'react';
-import { FiAlertOctagon, FiArchive, FiClock, FiEdit3, FiEdit, FiEye, FiMoreHorizontal, FiPrinter, FiTrash, FiTrash2 } from 'react-icons/fi';
+import React, { useEffect } from 'react';
+import { FiArchive, FiEdit, FiEye,FiTrash  } from 'react-icons/fi';
 import Table from './Table';
-import SelectDropdown from './InputComponents/SelectDropdown';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { usePublishers } from '../contextApi/publisherContext/PublisherContext';
-import { FiBarChart, FiBell, FiBookOpen, FiBriefcase, FiCheck, FiFilter, FiPaperclip, FiPlus, FiSend, FiShield, FiUser, FiWifiOff } from 'react-icons/fi'
+import { FiBell, FiBookOpen, FiBriefcase, FiCheck, FiSend, FiShield, FiUser, FiWifiOff } from 'react-icons/fi'
 import { useFilter } from '../contextApi/FilterContext';
 
 const statusColors = {
@@ -14,16 +13,6 @@ const statusColors = {
   4: { label: 'Suspended', className: 'badge bg-info' },
   5: { label: 'Deleted', className: 'badge bg-secondary' },
 };
-
-const actions = [{ label: 'Edit', icon: <FiEdit3 /> }, { label: 'Print', icon: <FiPrinter /> }, { label: 'Remind', icon: <FiClock /> }, { type: 'divider' }, { label: 'Archive', icon: <FiArchive /> }, { label: 'Report Spam', icon: <FiAlertOctagon /> }, { type: 'divider' }, { label: 'Delete', icon: <FiTrash2 /> }];
-
-const TableCell = memo(({ options, defaultSelect }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
-
-  const navigate = useNavigate();
-
-  return <SelectDropdown options={options} defaultSelect={defaultSelect} selectedOption={selectedOption} onSelectOption={(option) => setSelectedOption(option)} />;
-});
 
 export const tableColumnFilter = [
   { label: 'All', icon: <FiEye /> },
@@ -69,9 +58,10 @@ const PublisherTable = ({ publishers }) => {
       label: 'Publisher Code',
     },
     {
-      accessorKey: 'company_code',
-      header: () => 'Company Code',
-      label: 'Company Code',
+      accessorKey: 'company',
+      header: () => 'Company',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'Company Name',
     },
     {
       accessorKey: 'email',
@@ -79,11 +69,11 @@ const PublisherTable = ({ publishers }) => {
       cell: (info) => <Link to={`mailto:${info.getValue()}`}>{info.getValue()}</Link>,
     },
     {
-      accessorKey: 'pub_status_id',
+      accessorKey: 'pub_status',
       header: () => 'Status',
       cell: (info) => {
-        const id = info.getValue(); // e.g. 1,2,3...
-        const status = statusColors[id] || { label: 'Unknown', className: 'badge bg-light text-dark' };
+        const statusObj = info.getValue(); // e.g. 1,2,3...
+        const status = statusColors[statusObj?.id] || { label: statusObj?.label || 'Unknown', className: 'badge bg-light text-dark' };
 
         return <span className={status.className}>{status.label}</span>;
       },
@@ -92,28 +82,33 @@ const PublisherTable = ({ publishers }) => {
       },
     },
     {
-      accessorKey: 'pub_country_id',
-      header: () => 'Country ID',
-      label: 'Country ID',
+      accessorKey: 'pub_country',
+      header: () => 'Country',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'Country',
     },
     {
-      accessorKey: 'pub_state_id',
-      header: () => 'State ID',
-      label: 'State ID',
+      accessorKey: 'pub_state',
+      header: () => 'State',
+      cell: (info) => info.getValue()?.name || '',
+      label: 'State',
     },
     {
-      accessorKey: 'pub_timezone_id',
-      header: () => 'Timezone ID',
-      label: 'Timezone ID',
+      accessorKey: 'pub_timezone',
+      header: () => 'Timezone',
+      cell: (info) => info.getValue()?.code || '',
+      label: 'Timezone',
     },
     {
-      accessorKey: 'role_code',
-      header: () => 'Role Code',
+      accessorKey: 'role',
+      header: () => 'Role',
+      cell: (info) => info.getValue()?.code || '',
       label: 'Role Code',
     },
     {
-      accessorKey: 'created_by',
+      accessorKey: 'created_user',
       header: () => 'Created By',
+      cell: (info) => info.getValue()?.name || '',
       label: 'Created By',
     },
     {

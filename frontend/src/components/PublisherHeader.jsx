@@ -8,19 +8,6 @@ import { publisherbuttonData } from '../pages/publishers/PublisherList';
 import OffCanvas from './OffCanvas';
 import { publisherFilterColumn } from '../utils/publisherFilterColumn';
 
-
-export const filterAction = [
-  { label: 'All', icon: <FiEye /> },
-  { label: 'Sent', icon: <FiSend /> },
-  { label: 'Open', icon: <FiBookOpen /> },
-  { label: 'Draft', icon: <FiArchive /> },
-  { label: 'Revised', icon: <FiBell /> },
-  { label: 'Declined', icon: <FiShield /> },
-  { label: 'Accepted', icon: <FiCheck /> },
-  { label: 'Leads', icon: <FiBriefcase /> },
-  { label: 'Expired', icon: <FiWifiOff /> },
-  { label: 'Customers', icon: <FiUser /> },
-];
 export const fileType = [
   { label: 'PDF', icon: <BsFiletypePdf /> },
   { label: 'CSV', icon: <BsFiletypeCsv /> },

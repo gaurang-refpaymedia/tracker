@@ -1,63 +1,38 @@
 import { useNavigate, useParams } from 'react-router-dom';
-
 import { usePublishers } from '../../contextApi/publisherContext/PublisherContext';
-
 import { useEffect, useState } from 'react';
-
 import SelectDropdown from '../../components/InputComponents/SelectDropdown';
-
 import Input from '../../components/InputComponents/Input';
-
 import { DataContext } from '../../contextApi/DataContext';
-
 import { useContext } from 'react';
-
-const propsalDiscountOptions = [
-  { value: 'no-discount', label: 'No Discount' },
-
-  { value: 'before-tax', label: 'Before Tax' },
-
-  { value: 'after-tax', label: 'After Tax' },
-];
 
 export default function PublisherForm() {
   const { id } = useParams();
-
-  const [selectedOption, setSelectedOption] = useState(null);
-
   const isEdit = Boolean(id);
-
   const { addPublisher, editPublisher, loadPublisher, publisher, error } = usePublishers();
-
-  const { countries, countriesItems, states, statesItems, statuses, statusesItems, timezones, timezonesItems, loadingCountries, loadingStates, loadingStatuses, loadingTimezones, countryError, stateError, statusError, timezoneError } = useContext(DataContext);
+  const { countries, countriesItems, states, statesItems, statuses, statusesItems, timezones, timezonesItems } = useContext(DataContext);
 
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     pubcode: '',
-
-    pub_country_id: '',
-
-    pub_status_id: '',
-
-    pub_state_id: '',
-
-    pub_timezone_id: '',
-
+    pub_country_id: null,
+    pub_status_id: null,
+    pub_state_id: null,
+    pub_timezone_id: null,
     token: '',
-
     email: '',
+    contact_number: '',
+    contact_person: '',
+    currency: '',
+    address: '',
+    active_state: true,
   });
-
-  console.log(formData);
 
   useEffect(() => {
     countriesItems();
-
     statesItems();
-
     statusesItems();
-
     timezonesItems();
   }, []);
 
@@ -69,34 +44,49 @@ export default function PublisherForm() {
 
   useEffect(() => {
     if (publisher && isEdit) {
-      setFormData(publisher);
+      setFormData({
+        pubcode: publisher.pubcode || '',
+        email: publisher.email || '',
+        token: publisher.token || '',
+        contact_number: publisher.contact_number || '',
+        contact_person: publisher.contact_person || '',
+        currency: publisher.currency || '',
+        address: publisher.address || '',
+        pub_country_id: publisher.pub_country?.id || null,
+        pub_state_id: publisher.pub_state?.id || null,
+        pub_status_id: publisher.pub_status?.id || null,
+        pub_timezone_id: publisher.pub_timezone?.id || null,
+        active_state: publisher.active_state ?? true, // ✅ pick from API or fallback
+      });
     }
-  }, [publisher]);
+  }, [publisher, isEdit]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log('formData', formData);
-
-    let result;
-
-    if (isEdit) {
-      result = editPublisher(id, formData);
-    } else {
-      result = addPublisher(formData);
+    const payload = {
+      ...formData,
+      contact_person: formData.contact_person?.trim() || '',
+      currency: formData.currency?.trim() || '',
+      address: formData.address?.trim() || '',
+      active_state: formData.active_state,
     }
 
-    if (result && !error) {
+    if (isEdit) {
+      editPublisher(id, payload);
+    } else {
+      addPublisher(payload);
+    }
+
+    if (!error) {
       navigate('/publishers');
     }
   };
@@ -162,7 +152,6 @@ export default function PublisherForm() {
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
-
                         pub_country_id: option.value,
                       }))
                     }
@@ -179,7 +168,6 @@ export default function PublisherForm() {
                     onSelectOption={(option) =>
                       setFormData((prev) => ({
                         ...prev,
-
                         pub_state_id: option.value,
                       }))
                     }
@@ -219,6 +207,68 @@ export default function PublisherForm() {
                     }
                   />
                 </div>
+
+                <div className="col-lg-4 mb-4">
+                <label className="form-label">Contact Number</label>
+                <Input
+                  label="Contact Number"
+                  onChange={handleChange}
+                  labelId="contact_number"
+                  placeholder="Contact Number"
+                  name="contact_number"
+                  value={formData.contact_number}
+                />
+              </div>
+
+              {/* Contact Person */}
+              <div className="col-lg-4 mb-4">
+                <label className="form-label">Contact Person</label>
+                <Input
+                  label="Contact Person"
+                  onChange={handleChange}
+                  labelId="contact_person"
+                  placeholder="Contact Person"
+                  name="contact_person"
+                  value={formData.contact_person}
+                />
+              </div>
+
+              {/* Currency */}
+              <div className="col-lg-4 mb-4">
+                <label className="form-label">Currency</label>
+                <Input
+                  label="Currency"
+                  onChange={handleChange}
+                  labelId="currency"
+                  placeholder="Currency"
+                  name="currency"
+                  value={formData.currency}
+                />
+              </div>
+
+              {/* Address */}
+              <div className="col-lg-8 mb-4">
+                <label className="form-label">Address</label>
+                <Input
+                  label="Address"
+                  onChange={handleChange}
+                  labelId="address"
+                  placeholder="Address"
+                  name="address"
+                  value={formData.address}
+                />
+              </div>
+
+              {/* Active State */}
+              <div className="col-lg-4 mb-4 d-flex align-items-center">
+                <label className="form-label me-3">Active</label>
+                <input
+                  type="checkbox"
+                  name="active_state"
+                  checked={formData.active_state}
+                  onChange={handleChange}
+                />
+              </div>
               </div>
 
               <div className="row">

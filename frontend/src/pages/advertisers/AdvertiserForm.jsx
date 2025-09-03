@@ -91,7 +91,7 @@ export default function AdvertiserForm() {
       addAdvertiser(payload);
     }
 
-    // if (!error) navigate('/advertisers');
+    if (!error) navigate('/advertisers');
   };
 
   return (

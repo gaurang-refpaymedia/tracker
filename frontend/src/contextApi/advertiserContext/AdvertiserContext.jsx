@@ -1,4 +1,4 @@
-import { createContext, useReducer, useContext, useEffect,useState } from 'react';
+import { createContext, useContext,useState } from 'react';
 import { fetchAdvertisers, fetchAdvertiser, createAdvertiser, updateAdvertiser, deleteAdvertiser } from '../../api/advertiserApi';
 
 const AdvertiserContext = createContext();

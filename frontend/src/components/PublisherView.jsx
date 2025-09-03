@@ -5,12 +5,16 @@ const PublisherView = ({ publisher }) => {
   const transformPublisherToViewData = (publisher) => [
     { title: 'Publisher Code', content: publisher.pubcode },
     { title: 'Email', content: <a href={`mailto:${publisher.email}`}>{publisher.email}</a> },
-    { title: 'Company Code', content: publisher.company_code },
+    { title: 'Company Code', content: publisher.company.name },
     { title: 'Token', content: publisher.token },
-    { title: 'Status', content: publisher.pub_status_id || 'Unknown' },
-    { title: 'Country ID', content: publisher.pub_country_id },
-    { title: 'State ID', content: publisher.pub_state_id },
-    { title: 'Timezone ID', content: publisher.pub_timezone_id },
+    { title: 'Status', content: publisher.pub_status.label || 'Unknown' },
+    { title: 'Country', content: publisher.pub_country.name },
+    { title: 'State', content: publisher.pub_state.name },
+    { title: 'Timezone', content: publisher.pub_timezone.code },
+    { title: 'Contact Person', content: publisher.contact_person },
+    { title: 'Contact Number', content: publisher.contact_number },
+    { title: 'Currency', content: publisher.currency },
+    { title: 'Address', content: publisher.address },
     { title: 'Active State', content: publisher.active_state ? 'Yes' : 'No' },
   ];
 
