@@ -1,6 +1,5 @@
 # publisher/routes.py --
 
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -35,7 +34,8 @@ def get_current_identity(request, db: Session = Depends(get_db)) -> Union[User, 
         return subuser
 
 
-@router.post("/", response_model=schemas.PublisherResponse)
+
+@router.post("/", response_model=schemas.PublisherOut)
 def create_publisher(
     publisher: schemas.PublisherCreate,
     db: Session = Depends(get_db),
@@ -45,11 +45,12 @@ def create_publisher(
         db=db,
         publisher=publisher,
         company_code=current_identity.get("company_code", ""),
-        created_by=current_identity.get("user_code", ""),
+        user_code=current_identity.get("user_code", ""),
     )
 
 
-@router.get("/", response_model=List[schemas.PublisherResponse])
+
+@router.get("/", response_model=List[schemas.PublisherOut])
 def get_publishers(
     db: Session = Depends(get_db),
     current_identity = Depends(auth.get_current_user),
@@ -57,7 +58,8 @@ def get_publishers(
     return crud.get_publishers_for_company(db, current_identity.get("company_code", ""))
 
 
-@router.get("/{publisher_id}", response_model=schemas.PublisherResponse)
+
+@router.get("/{publisher_id}", response_model=schemas.PublisherOut)
 def get_publisher_by_id(
     publisher_id: int,
     db: Session = Depends(get_db),
@@ -69,7 +71,8 @@ def get_publisher_by_id(
     return publisher
 
 
-@router.put("/{publisher_id}", response_model=schemas.PublisherResponse)
+
+@router.put("/{publisher_id}", response_model=schemas.PublisherOut)
 def update_publisher(
     publisher_id: int,
     publisher_update: schemas.PublisherUpdate,
@@ -77,7 +80,11 @@ def update_publisher(
     current_identity = Depends(auth.get_current_user),
 ):
     publisher = crud.update_publisher(
-        db, publisher_id, publisher_update, current_identity.get("company_code", "")
+        db,
+        publisher_id=publisher_id,
+        publisher_update=publisher_update,
+        company_code=current_identity.get("company_code", ""),
+        user_code=current_identity.get("user_code", ""),
     )
     if not publisher:
         raise HTTPException(status_code=404, detail="Publisher not found")

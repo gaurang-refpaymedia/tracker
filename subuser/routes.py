@@ -1,6 +1,5 @@
 # subuser/routes.py --
 
-
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -35,30 +34,10 @@ get_db = database.get_db
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_current_identity(request: Request, db: Session = Depends(get_db)):
-    user_data = request.session.get("user")
-    if not user_data:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    role_code = user_data.get("role_code")
-    user_code = user_data.get("user_code")
-
-    if role_code == "SUPER_ADMIN":
-        user = db.query(models.User).filter(models.User.user_code == user_code).first()
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        return user
-    else:
-        subuser = db.query(SubUser).filter(SubUser.user_code == user_code).first()
-        if not subuser:
-            raise HTTPException(status_code=401, detail="Sub-user not found")
-        return subuser
-
-
 @router.get("/", response_model=List[schemas.SubUserResponse])
 def get_subusers(
     db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+    current_identity=Depends(auth.get_current_user),
 ):
     return crud.get_all_subusers_for_company(db, current_identity.company_code)
 
@@ -111,8 +90,7 @@ async def create_sub_user(
         
         existing_codes_user = [user.user_code for user in db.query(models.User).filter(models.User.company_code == company.code).all()]
         existing_codes_subuser = [user.user_code for user in db.query(SubUser).filter(SubUser.company_code == company.code).all()]
-        existing_codes = existing_codes_user + existing_codes_subuser
-        # Assuming `generate_user_code` is defined and imported elsewhere
+        existing_codes = existing_codes_user + existing_codes_subuser        
         new_user_code = generate_user_code(company.code, existing_codes)
 
         # Check for email in both User and SubUser tables
@@ -121,8 +99,6 @@ async def create_sub_user(
         if email_in_users or email_in_subusers:
             raise HTTPException(status_code=400, detail="Email already in use")
 
-        # IMPORTANT CHANGE: Hash the password provided from the frontend
-        # This replaces the previous logic that generated a random password
         hashed_password = auth.get_password_hash(user_data.password)
 
         new_sub_user = SubUser(
@@ -131,8 +107,9 @@ async def create_sub_user(
             company_code=company.code,
             role_code=user_data.role_code,
             user_code=new_user_code,
-            # The password attribute should be set to the hashed password
-            password=hashed_password
+            password=hashed_password,
+            created_by=super_user_code,
+            updated_by=super_user_code
         )
         db.add(new_sub_user)
         db.commit()
@@ -156,10 +133,10 @@ def update_subuser(
     subuser_id: int,
     updates: schemas.SubUserUpdate,
     db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+    current_identity=Depends(auth.get_current_user),
 ):
     target = crud.get_subuser_by_id(db, subuser_id)
-    if not target or target.company_code != current_identity.company_code:
+    if not target or target.company_code != current_identity.get("company_code",""):
         raise HTTPException(status_code=404, detail="Sub-user not found or access denied")
 
     # Only SUPER_ADMIN and ADMIN can update any subuser, others can update only self
@@ -177,13 +154,13 @@ def update_subuser(
 def deactivate_subuser(
     subuser_id: int,
     db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+    current_identity=Depends(auth.get_current_user),
 ):
     if current_identity.role_code not in ["SUPER_ADMIN", "ADMIN", "SUB_ADMIN"]:
         raise HTTPException(status_code=403, detail="You are not allowed to deactivate sub-users")
 
     target = crud.get_subuser_by_id(db, subuser_id)
-    if not target or target.company_code != current_identity.company_code:
+    if not target or target.company_code != current_identity.get("company_code",""):
         raise HTTPException(status_code=404, detail="Sub-user not found or access denied")
 
     return crud.deactivate_subuser(db, subuser_id, current_identity)
@@ -193,13 +170,13 @@ def deactivate_subuser(
 def delete_subuser(
     subuser_id: int,
     db: Session = Depends(get_db),
-    current_identity=Depends(get_current_identity),
+    current_identity=Depends(auth.get_current_user),
 ):
-    if current_identity.role_code not in ["SUPER_ADMIN", "ADMIN"]:
+    if current_identity.get("role_code","") not in ["SUPER_ADMIN", "ADMIN"]:
         raise HTTPException(status_code=403, detail="You are not allowed to delete sub-users")
 
     target = crud.get_subuser_by_id(db, subuser_id)
-    if not target or target.company_code != current_identity.company_code:
+    if not target or target.company_code != current_identity.get("company_code",""):
         raise HTTPException(status_code=404, detail="Sub-user not found or access denied")
 
     return crud.delete_subuser(db, subuser_id, current_identity)

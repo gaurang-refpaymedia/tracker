@@ -14,8 +14,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # Load Base and all models
 from app.database import Base
 from app import models as app_models
-from advertiser import models as advertiser_models
 from subuser import models as subuser_models
+from advertiser import models as advertiser_models
+from publisher import models as publisher_models
+from campaign import models as campaign_models
 from dotenv import load_dotenv
 
 

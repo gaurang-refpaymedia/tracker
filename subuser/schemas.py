@@ -2,6 +2,15 @@
 
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import datetime
+
+
+class UserOut(BaseModel):
+    id: int
+    name: str
+    user_code: str
+    class Config:
+        orm_mode = True
 
 
 class SubUserBase(BaseModel):
@@ -36,6 +45,13 @@ class SubUserResponse(BaseModel):
     created_by: Optional[str] = None
     active_state: bool
     phone: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    updated_by: str
+    creator_user: Optional[UserOut] = None
+    creator_subuser: Optional[UserOut] = None
+    updater_user: Optional[UserOut] = None
+    updater_subuser: Optional[UserOut] = None
 
     model_config = {
         "from_attributes": True

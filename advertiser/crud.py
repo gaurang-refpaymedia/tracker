@@ -1,15 +1,10 @@
-# advertiser/crud.py --
-
-
 from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException
 from sqlalchemy.orm import joinedload
 
-
-
-def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company_code: str, created_by: str):
+def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company_code: str, user_code: str):
     existing = db.query(models.Advertiser).filter_by(email=advertiser.email, company_code=company_code).first()
     
     if existing:
@@ -21,12 +16,13 @@ def create_advertiser(db: Session, advertiser: schemas.AdvertiserCreate, company
             raise HTTPException(status_code=400, detail="Token already exists")
     
     # Exclude fields that are passed manually to avoid conflict
-    data = advertiser.model_dump(exclude={"company_code", "created_by"})
+    data = advertiser.model_dump(exclude={"company_code", "created_by", "updated_by"})
     
     db_adv = models.Advertiser(
         **data,
         company_code=company_code,
-        created_by=created_by,
+        created_by=user_code,
+        updated_by=user_code,
     )
 
     db.add(db_adv)
@@ -58,13 +54,14 @@ def get_advertiser(db: Session, advertiser_id: int, company_code: str):
             joinedload(models.Advertiser.role),
             joinedload(models.Advertiser.creator_user),
             joinedload(models.Advertiser.creator_subuser),
+            joinedload(models.Advertiser.updater_user),
+            joinedload(models.Advertiser.updater_subuser),
         )
         .filter_by(id=advertiser_id, company_code=company_code)
         .first()
     )
 
-
-def update_advertiser(db: Session, advertiser_id: int, updated_data: schemas.AdvertiserUpdate, company_code: str):
+def update_advertiser(db: Session, advertiser_id: int, updated_data: schemas.AdvertiserUpdate, company_code: str, user_code: str):
     advertiser = get_advertiser(db, advertiser_id, company_code)
 
     if not advertiser:
@@ -76,6 +73,7 @@ def update_advertiser(db: Session, advertiser_id: int, updated_data: schemas.Adv
     for field, value in updated_data.model_dump(exclude_unset=True).items():
         if hasattr(advertiser, field):
             setattr(advertiser, field, value)
+    advertiser.updated_by = user_code
 
     try:
         db.commit()

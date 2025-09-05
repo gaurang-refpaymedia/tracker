@@ -44,7 +44,7 @@ const RegisterForm = ({ path }) => {
         subscription_code: subscriptions[0].code,
       }));
     }
-  }, [subscriptions, subscriptionsItems, formData.subscription_code]); // Add subscriptions and subscriptionsItems to dependency array
+  }, []); // Add subscriptions and subscriptionsItems to dependency array
   // formData.subscription_code is added to prevent re-setting if user manually changes it.
 
   const handleChange = (e) => {

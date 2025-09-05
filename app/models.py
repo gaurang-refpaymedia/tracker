@@ -1,10 +1,28 @@
-# app/models.py --
+# app/models.py 
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
-from .database import Base
+from sqlalchemy import (
+    Column, String, Integer, ForeignKey, Boolean, DateTime, func
+)
+from sqlalchemy.orm import relationship, declarative_base
+from .database import Base 
 
+class StampBaseModel(Base): 
+    """
+    An abstract base model that provides timestamp and user-stamping fields.
+    - created_at: Timestamp of object creation.
+    - updated_at: Timestamp of last object update.
+    - created_by: The 'user_code' of the user/subuser who created the object.
+    - updated_by: The 'user_code' of the user/subuser who last updated the object.
+    """
+    __abstract__ = True
 
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    
+    created_by = Column(String(50), nullable=False)
+    updated_by = Column(String(50), nullable=False)
+    
+    
 class Subscription(Base):
     __tablename__ = "subscriptions"
     id = Column(Integer, primary_key=True, index=True)
@@ -33,7 +51,6 @@ class Role(Base):
     subusers = relationship("SubUser", back_populates="role")
 
 
-
 class Company(Base):
     __tablename__ = "companies"
     id = Column(Integer, primary_key=True, index=True)
@@ -41,7 +58,6 @@ class Company(Base):
     code = Column(String(50), unique=True)
     subscription_code = Column(String(50), ForeignKey("subscriptions.code"))
     
-     # Add these two lines below:
     users = relationship("User", back_populates="company", cascade="all, delete")
     subusers = relationship("SubUser", back_populates="company")
     
@@ -58,33 +74,34 @@ class User(Base):
     otp = Column(String(6))
 
     company = relationship("Company", back_populates="users")
-    created_subusers = relationship("SubUser", back_populates="creator")
+    created_subusers = relationship("SubUser", primaryjoin="foreign(SubUser.created_by) == User.user_code", viewonly=True)
     
 
 class Country(Base):
     __tablename__ = "countries"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False)
-    advertisers_by_country = relationship("Advertiser", back_populates="adv_country")
 
 
 class State(Base):
     __tablename__ = "states"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, nullable=False)
-    advertisers_by_state = relationship("Advertiser", back_populates="adv_state")
 
 
 class Status(Base):
     __tablename__ = "statuses"
     id = Column(Integer, primary_key=True, index=True)
     label = Column(String(100), unique=True, nullable=False)
-    advertisers_by_status = relationship("Advertiser", back_populates="adv_status")
 
 
 class Timezone(Base):
     __tablename__ = "timezones"
     id = Column(Integer, primary_key=True, index=True)
     code = Column(String(100), unique=True, nullable=False)
-    advertisers_by_timezone = relationship("Advertiser", back_populates="adv_timezone")
+
     
+class Currency(Base):
+    __tablename__ = "currencies"
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(5), unique=True, nullable=False)

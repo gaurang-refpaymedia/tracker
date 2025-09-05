@@ -1,6 +1,5 @@
 # publisher/crud.py --
 
-
 from sqlalchemy.orm import Session
 from . import models, schemas
 from sqlalchemy.exc import IntegrityError
@@ -9,7 +8,8 @@ from app.models import Company, User
 from sqlalchemy.orm import joinedload
 
 
-def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_code: str, created_by: str):
+
+def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_code: str, user_code: str):
     existing = db.query(models.Publisher).filter_by(email=publisher.email, company_code=company_code).first()
     
     if existing:
@@ -21,12 +21,13 @@ def create_publisher(db: Session, publisher: schemas.PublisherCreate, company_co
             raise HTTPException(status_code=400, detail="Token already exists")
     
     # Exclude fields that are passed manually to avoid conflict
-    data = publisher.model_dump(exclude={"company_code", "created_by"})
+    data = publisher.model_dump(exclude={"company_code", "created_by", "updated_by"})
     
     db_pub = models.Publisher(
         **data,
         company_code=company_code,
-        created_by=created_by,
+        created_by=user_code,
+        updated_by=user_code,
     )
 
     db.add(db_pub)
@@ -57,13 +58,16 @@ def get_publisher(db: Session, publisher_id: int, company_code: str):
             joinedload(models.Publisher.role),
             joinedload(models.Publisher.creator_user),
             joinedload(models.Publisher.creator_subuser),
+            joinedload(models.Publisher.updater_user),
+            joinedload(models.Publisher.updater_subuser),
         )
         .filter_by(id=publisher_id, company_code=company_code)
         .first()
     )
 
 
-def update_publisher(db: Session, publisher_id: int, updated_data: schemas.PublisherUpdate, company_code: str):
+
+def update_publisher(db: Session, publisher_id: int, updated_data: schemas.PublisherUpdate, company_code: str, user_code: str):
     publisher = get_publisher(db, publisher_id, company_code)
 
     if not publisher:
@@ -76,6 +80,7 @@ def update_publisher(db: Session, publisher_id: int, updated_data: schemas.Publi
         if hasattr(publisher, field):
             setattr(publisher, field, value)
 
+    publisher.updated_by = user_code
     try:
         db.commit()
         db.refresh(publisher)

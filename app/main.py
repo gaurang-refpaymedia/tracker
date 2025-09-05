@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware # Import CORS middleware
 from advertiser import routes as advertiser_routes
 from publisher import routes as publisher_routes
 from subuser import routes as subuser_routes
+from campaign import routes as campaign_routes
 
 # Load environment variables from .env
 load_dotenv()
@@ -53,6 +54,7 @@ app.include_router(user_routes.router)
 app.include_router(advertiser_routes.router)
 app.include_router(publisher_routes.router)
 app.include_router(subuser_routes.router)
+app.include_router(campaign_routes.router)
 
 
 # alembic revision -m "change hashed_password to password in models"

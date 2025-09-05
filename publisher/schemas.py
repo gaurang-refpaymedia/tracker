@@ -1,8 +1,6 @@
-# publisher/schemas.py --
-
-
 from pydantic import BaseModel, EmailStr
 from typing import Optional
+from datetime import datetime
 
 class CountryOut(BaseModel):
     id: int
@@ -49,7 +47,6 @@ class UserOut(BaseModel):
     class Config:
         orm_mode = True
 
-
 class PublisherBase(BaseModel):
     id: int
     pubcode: str | None
@@ -57,9 +54,15 @@ class PublisherBase(BaseModel):
     contact_person: str | None
     contact_number: str | None
     token: str | None
-    currency: str | None
+    # currency field removed
     address: str | None
     active_state: bool
+
+    # Stamp fields added
+    created_at: datetime
+    updated_at: datetime
+    created_by: str
+    updated_by: str
 
     pub_country: CountryOut
     pub_state: StateOut
@@ -67,12 +70,14 @@ class PublisherBase(BaseModel):
     pub_timezone: TimezoneOut
     company: CompanyOut
     role: RoleOut | None
+
     creator_user: UserOut | None
     creator_subuser: UserOut | None
+    updater_user: UserOut | None
+    updater_subuser: UserOut | None
 
     class Config:
         orm_mode = True
-
 
 class PublisherCreate(BaseModel):
     pubcode: str
@@ -84,10 +89,9 @@ class PublisherCreate(BaseModel):
     email: EmailStr
     contact_person: Optional[str]
     contact_number: Optional[str]
-    currency: Optional[str]
+    # currency field removed
     address: Optional[str]
     active_state: Optional[bool]
-
 
 class PublisherUpdate(BaseModel):
     pubcode: Optional[str]
@@ -99,26 +103,21 @@ class PublisherUpdate(BaseModel):
     contact_person: Optional[str]
     contact_number: Optional[str]
     token: Optional[str]
-    currency: Optional[str]
     address: Optional[str]
     active_state: Optional[bool]
-
 
 class PublisherResponse(PublisherBase):
     id: int
     company_code: str
-    created_by: Optional[str]
-
+    
     class Config:
         orm_mode = True
-
 
 class Publisher(PublisherBase):
     id: int
 
     class Config:
         orm_mode = True
-
 
 class PublisherOut(BaseModel):
     id: int
@@ -127,9 +126,13 @@ class PublisherOut(BaseModel):
     contact_person: str | None
     contact_number: str | None
     token: str | None
-    currency: str | None
     address: str | None
     active_state: bool
+
+    created_at: datetime
+    updated_at: datetime
+    created_by: str
+    updated_by: str
 
     pub_country: CountryOut
     pub_state: StateOut
@@ -137,8 +140,11 @@ class PublisherOut(BaseModel):
     pub_timezone: TimezoneOut
     company: CompanyOut
     role: RoleOut | None
+    
     creator_user: UserOut | None
     creator_subuser: UserOut | None
+    updater_user: UserOut | None
+    updater_subuser: UserOut | None
 
     class Config:
         orm_mode = True

@@ -1,6 +1,5 @@
 # subuser/crud.py --
 
-
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -21,7 +20,7 @@ def get_all_subusers_for_company(db: Session, company_code: str):
 def get_subuser_by_id(db: Session, subuser_id: int):
     return db.query(models.SubUser).filter_by(id=subuser_id).first()
 
-def create_subuser(db: Session, subuser: schemas.SubUserCreate, company_code: str, created_by: str):
+def create_subuser(db: Session, subuser: schemas.SubUserCreate, company_code: str, user_code: str):
     # ✅ Check if sub-user with same email already exists in the company
     existing = db.query(models.SubUser).filter_by(email=subuser.email, company_code=company_code).first()
     if existing:
@@ -43,7 +42,8 @@ def create_subuser(db: Session, subuser: schemas.SubUserCreate, company_code: st
         phone=subuser.phone,
         role_code=subuser.role_code,
         company_code=company_code,
-        created_by=created_by,
+        created_by=user_code,
+        updated_by=user_code, # Set initial updater
         password=subuser.password,
         active_state=True  # Assuming default active on creation
     )
@@ -68,12 +68,14 @@ def update_subuser(db: Session, subuser_id: int, updates: schemas.SubUserUpdate,
     if subuser.company_code != current_user.company_code:
         raise HTTPException(status_code=403, detail="Access denied")
 
+
     # ✅ Prevent changing to SUPER_ADMIN role
     if updates.role_code == "SUPER_ADMIN":
         raise HTTPException(status_code=403, detail="Cannot assign SUPER_ADMIN role to sub-user")
 
     for field, value in updates.dict(exclude_unset=True).items():
         setattr(subuser, field, value)
+    subuser.updated_by = current_user.user_code
 
     db.commit()
     db.refresh(subuser)
@@ -87,6 +89,7 @@ def deactivate_subuser(db: Session, subuser_id: int, current_user: Union[User, S
         raise HTTPException(status_code=403, detail="Access denied")
 
     subuser.active_state = False
+    subuser.updated_by = current_user.user_code
     db.commit()
     db.refresh(subuser)
     return subuser
